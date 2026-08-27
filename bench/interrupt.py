@@ -36,6 +36,35 @@ wav (measured with the same VAD, not the position we intended) does the rest.
 A turn whose barge-in lands outside the reply -- before the agent starts, or
 after it has already finished -- is DISCARDED with its reason recorded, never
 counted as a non-response. Aiming with a median gap does not always hit.
+
+WHICH NUMBER IS A PROPERTY OF THE SYSTEM. ``stop_latency_ms`` is not. On a
+system that never yields it is just whatever was left of the reply, so it is a
+property of the PROBE (where the barge-in was aimed) and of the reply's length,
+not of the agent. The system properties are the categorical ones --
+``played_to_completion``, ``yielded``, ``heard_barge_in`` -- and those are what
+the verdict is built from.
+
+That distinction is not theoretical; it is what an independent measurement
+showed. A separate effort (~/Desktop/Playground/fullduplex-voice,
+``cascade_bargein.py``) measured the same agent on the same machine through its
+own probe and reported a median stop latency of 1173 ms [1060-1264], n=20,
+0/20 stopped early. This harness, n=73 landed across three configurations,
+measures 1992 ms [511-2785], 0/73 stopped early, 0/73 heard.
+
+The two agree exactly on every categorical result and differ 2x on the
+milliseconds, and the difference is fully accounted for: they interrupt at a
+fixed 900 ms and draw from a five-prompt set; this probe aims 350 ms into the
+reply (measured median 361 ms) over 25 prompts whose replies run to a median of
+2445 ms. ``stop_latency ~= reply_audio_ms - barge_offset`` gives 2084 ms here,
+against a measured 1992 ms. Two probes, one behaviour, two different numbers --
+which is exactly why the verdict does not rest on the number.
+
+Their mechanism note was verified here in the source rather than taken on
+trust: ``live/loop.py`` line 360 allocates ``q = queue.Queue()`` *inside*
+``capture()`` (line 346), so the queue is rebuilt every turn and speech arriving
+during playback is discarded rather than buffered. The agent talks over you and
+then never hears what you said. This harness measures that consequence
+independently, via the transcript: 0 of 73 landed barge-ins left any trace.
 """
 
 from __future__ import annotations

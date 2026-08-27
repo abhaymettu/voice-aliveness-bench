@@ -136,6 +136,60 @@ worse, and it did not, because none of the three was ever interruptible to begin
 
 ---
 
+## Two independent cross-checks
+
+Both were run by a separate effort in `~/Desktop/Playground/fullduplex-voice` against the
+same agent on the same machine, and both were re-tested here against this repo's own data
+rather than taken on trust.
+
+### Barge-in: converges on the behaviour, differs 2x on the milliseconds
+
+| | this harness | fullduplex-voice `cascade_bargein.py` |
+|---|---|---|
+| stopped early | **0 / 73** | **0 / 20** |
+| barge-in reached the transcript | **0 / 73** | not measured (mechanism argued from source) |
+| median stop latency | 1992 ms [511–2785] | 1173 ms [1060–1264] |
+
+**Every categorical result agrees. The millisecond number does not, and it should not.**
+`stop_latency_ms` on a system that never yields is just whatever was left of the reply, so
+it is a property of the probe and the reply length, not of the agent. They interrupt at a
+fixed 900 ms over a five-prompt set; this probe aims 350 ms into the reply (measured median
+361 ms) over 25 prompts whose replies run to a median of 2445 ms.
+`stop_latency ≈ reply_audio_ms − barge_offset` predicts 2084 ms here against 1992 ms
+measured. Two probes, one behaviour, two numbers — which is why the verdict rests on the
+categorical result and not on the number.
+
+Their mechanism claim was verified here in the source: `live/loop.py:360` allocates
+`q = queue.Queue()` *inside* `capture()` (line 346), so the queue is rebuilt every turn and
+speech arriving during playback is discarded rather than buffered. This harness measures the
+consequence independently, through the transcript: 0 of 73 landed barge-ins left any trace.
+
+### The gap has a closed form, and it replicates
+
+`gap ≈ max(HANGOVER, ARM + W_total)` — for the serial path, `HANGOVER + W_total` — where
+`W_total` is summed per-stage work (ASR final + LM to first token + LM to end of sentence +
+TTS). Fitted there on 8 runs of a five-prompt set. Tested here on 25 prompts across five
+difficulty tiers, a different session:
+
+| system | measured gap | predicted | median residual |
+|---|---|---|---|
+| cascade-serial | 822 ms | 802 ms | **+24.9 ms** [+14/+41] |
+| cascade-fast | 550 ms | 534 ms | **+16.1 ms** [+7/+23] |
+| cascade-fast-tiny | 402 ms | 393 ms | **+17.8 ms** [+9/+22] |
+
+Their reported median residual was +15.3 ms. The residual stays a small positive constant —
+playback dispatch plus VAD frame quantisation — and never goes negative, which independently
+confirms the seriality the model assumes: the stages do not overlap.
+
+**This closed form explains the headline finding.** `W_total` contains TTS synthesis and
+LM-to-end-of-sentence time, and both grow with the length of the reply. The gap is a fixed
+floor plus work that scales with how much there is to say. There is no term in it for how
+hard the question was, which is exactly what the partial correlation shows empirically.
+Computed by `bench/gap.py::floor_model` and reported in `results/gap.json` under
+`floor_model`.
+
+---
+
 ## Running it
 
 ```bash

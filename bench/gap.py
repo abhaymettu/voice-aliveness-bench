@@ -85,6 +85,61 @@ def _partial_spearman(x, y, z) -> dict:
     }
 
 
+HANGOVER_MS = 350.0  # the loop's design constant; a floor, not a measurement
+WORK_STAGES = ("asr_final", "lm_ttft", "lm_sentence", "tts")
+
+
+def floor_model(rows, arm_ms: dict | None = None) -> dict:
+    """Test the closed-form floor against the measured gaps.
+
+        serial:  gap ~= HANGOVER + W_total
+        armed:   gap ~= max(HANGOVER, ARM + W_total)
+
+    where W_total is the summed per-stage work (ASR final decode + LM to first
+    token + LM to end of sentence + TTS). The model comes from a separate
+    effort in ~/Desktop/Playground/fullduplex-voice, fitted there on 8 runs of a
+    five-prompt set. This is an INDEPENDENT test of it: different prompt set (25
+    prompts across five difficulty tiers), different session, same machine.
+
+    It matters for this dimension because it says *why* the gap moves. W_total
+    contains TTS and LM-sentence time, both of which grow with the length of the
+    reply -- so a model that fits with a small constant residual is a mechanism
+    for the headline finding, not just a curve.
+
+    Seriality is the model's assumption and it is checkable here: if the stages
+    overlapped, the summed work would exceed the span and the residual would go
+    negative.
+    """
+    arm_ms = arm_ms or {}
+    out = {}
+    for name in sorted({r["system"] for r in rows}):
+        rs = [r for r in rows if r["system"] == name and r.get("gap_ms")
+              and r.get("work_ms")]
+        if len(rs) < 4:
+            out[name] = {"n": len(rs), "status": "not-measured",
+                         "reason": "no per-stage work timings on these turns"}
+            continue
+        arm = arm_ms.get(name)
+        w = [sum(r["work_ms"].get(k, 0.0) for k in WORK_STAGES) for r in rs]
+        g = [r["gap_ms"] for r in rs]
+        pred = [(HANGOVER_MS + x) if arm is None else max(HANGOVER_MS, arm + x) for x in w]
+        res = [a - b for a, b in zip(g, pred)]
+        out[name] = {
+            "n": len(rs),
+            "arm_ms": arm,
+            "formula": ("HANGOVER + W_total" if arm is None
+                        else "max(HANGOVER, ARM + W_total)"),
+            "hangover_ms": HANGOVER_MS,
+            "w_total_ms": stats(w),
+            "gap_ms": stats(g),
+            "predicted_ms": stats(pred),
+            "residual_ms": stats(res),
+            "note": "a small positive residual is the playback dispatch plus VAD frame "
+                    "quantisation; a negative one would mean stages overlapped",
+        }
+    return out
+
+
 def collect(systems, n_per_system: int, progress=True) -> list[dict]:
     """Run the difficulty cycle on every system, interleaved."""
     items = P.difficulty_cycle(n_per_system)
@@ -202,6 +257,17 @@ def score(rows) -> dict:
     return out
 
 
+def _arm_map(system_names) -> dict:
+    from systems.cascade import CONFIGS
+    out = {}
+    for n in system_names:
+        base = n[: -len("-say")] if n.endswith("-say") else n
+        c = CONFIGS.get(base)
+        if c:
+            out[n] = c["arm_ms"] if c["fast"] else None
+    return out
+
+
 def run(system_names, n: int = 25, out=None, device=None) -> dict:
     systems, info, player = open_systems(system_names, device=device)
     if not systems:
@@ -222,6 +288,7 @@ def run(system_names, n: int = 25, out=None, device=None) -> dict:
                           "(merge_gap_ms=30, min_len_ms=20)",
         "elapsed_s": round(time.perf_counter() - t0, 1),
         "score": score(rows),
+        "floor_model": floor_model(rows, _arm_map(system_names)),
         "rows": rows,
     })
     write_result(out or "results/gap.json", res)
@@ -287,9 +354,20 @@ if __name__ == "__main__":
     ap.add_argument("--out", default="results/gap.json")
     ap.add_argument("--device", default=None)
     ap.add_argument("--selfcheck", action="store_true")
+    ap.add_argument("--rescore", action="store_true",
+        help="recompute the scores from an existing results file's saved rows, "
+             "without re-running a single turn")
     a = ap.parse_args()
     if a.selfcheck:
         demo()
+    elif a.rescore:
+        import json as _j
+        d = _j.loads(Path(a.out).read_text())
+        d["score"] = score(d["rows"])
+        d["floor_model"] = floor_model(d["rows"], _arm_map(sorted(d["score"])))
+        Path(a.out).write_text(_j.dumps(d, indent=2, default=str))
+        print(report(d))
+        print(f"\nrescored {a.out} from its own saved rows; no turn was re-run")
     else:
         r = run(a.systems, n=a.n, out=a.out, device=a.device)
         print()
