@@ -688,10 +688,14 @@ function tick(){
 }
 document.addEventListener('keydown', e => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;
+  const onBtn = e.target.tagName === 'BUTTON';
   const n = parseInt(e.key, 10);
   if (n >= 1 && n <= Math.min(9, CLIPS.length)){ e.preventDefault(); play(n - 1); }
   else if (e.key === 'r' || e.key === 'R'){ e.preventDefault(); play(cur === null ? 0 : cur, true); }
-  else if (e.key === ' ' && cur !== null){ e.preventDefault(); stop(); }
+  else if (e.key === ' ' && cur !== null){
+    if (onBtn) return;               // let Space activate whatever is focused
+    e.preventDefault(); stop();
+  }
 });
 
 /* ---------- the adaptation chart ---------- */
