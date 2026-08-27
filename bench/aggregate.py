@@ -20,6 +20,11 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 RESULTS = Path("results")
+
+# A system can appear in one dimension's results and not another's, because
+# dimensions are run as separate sessions. That is not the same as a system
+# that ran and scored zero, and it must never render as one.
+NOT_IN_RUN = "this system was not part of that dimension's run"
 FILES = {
     "gap": "gap.json",
     "interrupt": "interrupt.json",
@@ -70,7 +75,7 @@ def table(res: dict) -> list[dict]:
                 "wer": g["endpointing"]["mean_wer_vs_prompt"],
             }
         else:
-            r["gap"] = {"status": "not-measured", "reason": (g or {}).get("reason", "not run")}
+            r["gap"] = {"status": "not-measured", "reason": (g or {}).get("reason", NOT_IN_RUN)}
 
         i = (res.get("interrupt", {}).get("score") or {}).get(name)
         r["interrupt"] = ({
@@ -79,7 +84,7 @@ def table(res: dict) -> list[dict]:
             "talked_over_median_ms": i["talked_over_ms"]["median"],
             "verdict": i["verdict"],
         } if i and i.get("n") else
-            {"status": "not-measured", "reason": (i or {}).get("reason", "not run")})
+            {"status": "not-measured", "reason": (i or {}).get("reason", NOT_IN_RUN)})
 
         s = (res.get("silence", {}).get("score") or {}).get(name)
         r["silence"] = ({
@@ -89,7 +94,7 @@ def table(res: dict) -> list[dict]:
                              "median_ms": v["time_to_outcome_ms"]["median"]}
                          for k, v in s["by_probe"].items()},
         } if s and s.get("n") else
-            {"status": "not-measured", "reason": (s or {}).get("reason", "not run")})
+            {"status": "not-measured", "reason": (s or {}).get("reason", NOT_IN_RUN)})
 
         p = (res.get("prosody", {}).get("score") or {}).get(name)
         if p and p.get("n"):
@@ -104,7 +109,7 @@ def table(res: dict) -> list[dict]:
             }
         else:
             r["prosody"] = {"status": "not-measured",
-                            "reason": (p or {}).get("reason", "not run")}
+                            "reason": (p or {}).get("reason", NOT_IN_RUN)}
 
         nv = (res.get("nonverbal", {}).get("score") or {}).get(name)
         r["nonverbal"] = ({
@@ -114,7 +119,7 @@ def table(res: dict) -> list[dict]:
             "n_dead_air": nv["n_dead_air"], "verdict": nv["verdict"],
             "demo_wav": nv.get("demo_wav"),
         } if nv and nv.get("n") else
-            {"status": "not-measured", "reason": (nv or {}).get("reason", "not run")})
+            {"status": "not-measured", "reason": (nv or {}).get("reason", NOT_IN_RUN)})
 
         rows.append(r)
     return rows
