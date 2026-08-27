@@ -154,6 +154,19 @@ def context_sensitivity(systems, out_dir: Path, progress=True) -> dict:
     out = {}
     for s in systems:
         try:
+            # DETERMINISM BASELINE FIRST. The context test reads "the two
+            # renderings differ" as evidence of context sensitivity. That
+            # inference is only valid if the backend is deterministic to begin
+            # with -- a synthesiser with any run-to-run jitter would look
+            # context-sensitive while carrying no context at all. macOS `say`
+            # shells out to a binary and cannot be assumed bit-stable, so it is
+            # checked rather than assumed: same text, twice, nothing in between.
+            b1 = s.synth(P.FLOOR_TEXT)
+            b2 = s.synth(P.FLOOR_TEXT)
+            bn = min(len(b1), len(b2))
+            bd = float(np.max(np.abs(b1[:bn] - b2[:bn]))) if bn else None
+            deterministic = bool(len(b1) == len(b2) and bd is not None and bd == 0.0)
+
             joy = next(p for p in P.AFFECT_PROMPTS if p[1] == "joy")
             grief = next(p for p in P.AFFECT_PROMPTS if p[1] == "grief")
             s.turn(s.render_prompt(joy[2]), label=joy[2], record=False)
@@ -172,22 +185,40 @@ def context_sensitivity(systems, out_dir: Path, progress=True) -> dict:
             aud.write(p2, a2)
             out[s.name] = {
                 "text": P.FLOOR_TEXT,
+                "determinism_baseline": {
+                    "same_text_twice_identical": deterministic,
+                    "max_abs_sample_difference": bd,
+                    "why": "the context test below can only be read if the backend is "
+                           "deterministic; this is that check, not an assumption",
+                },
                 "same_length": same_len,
                 "max_abs_sample_difference": d,
                 "identical": identical,
-                "context_sensitivity": 0.0 if identical else None,
+                "context_sensitivity": (0.0 if (deterministic and identical)
+                                        else None),
                 "interpretation": (
-                    "sample-identical after a joyful and after a grieving exchange: the "
-                    "voice stage receives only the reply text and carries no "
-                    "conversational state. Prosodic responsiveness to context is 0."
+                    "BACKEND IS NONDETERMINISTIC: the same text rendered twice back to "
+                    "back already differs, so a difference across contexts proves "
+                    "nothing. This dimension is not-measured for this system."
+                    if not deterministic else
+                    "sample-identical after a joyful and after a grieving exchange, on a "
+                    "backend verified deterministic: the voice stage receives only the "
+                    "reply text and carries no conversational state. Prosodic "
+                    "responsiveness to context is 0."
                     if identical else
-                    "the two renderings differ; the size of the difference is above, and "
-                    "what causes it needs following up before calling it responsiveness"),
+                    "the backend is deterministic and the two renderings differ, so "
+                    "something in the stack does condition the voice on context; the "
+                    "size of the difference is above"),
                 "wavs": [str(p1.relative_to(out_dir.parent)), str(p2.relative_to(out_dir.parent))],
             }
+            if not deterministic:
+                out[s.name]["status"] = "not-measured"
+                out[s.name]["reason"] = ("backend is not deterministic; same text twice "
+                                         f"differs by {bd}")
+                out[s.name]["identical"] = None
             if progress:
-                print(f"  context test  {s.name:<18} identical={identical} "
-                      f"max|diff|={d}", flush=True)
+                print(f"  context test  {s.name:<18} deterministic={deterministic} "
+                      f"identical={out[s.name]['identical']} max|diff|={d}", flush=True)
         except Exception as e:  # noqa: BLE001
             out[s.name] = {"status": "not-measured", "reason": f"{type(e).__name__}: {e}"}
     return out
@@ -318,8 +349,12 @@ def demo():
     movy = [row("movy", a, {"joy": 180.0, "grief": 60.0, "alarm": 220.0,
                             "neutral": 100.0, "flat": 50.0}[a], i)
             for i, a in enumerate(["joy", "grief", "alarm", "neutral", "flat"] * 4)]
-    ctx = {"flat": {"identical": True, "context_sensitivity": 0.0},
-           "movy": {"identical": False, "max_abs_sample_difference": 0.4}}
+    ctx = {"flat": {"identical": True, "context_sensitivity": 0.0,
+                    "determinism_baseline": {"same_text_twice_identical": True}},
+           "movy": {"identical": False, "max_abs_sample_difference": 0.4,
+                    "determinism_baseline": {"same_text_twice_identical": True}},
+           "jittery": {"identical": None, "status": "not-measured",
+                       "determinism_baseline": {"same_text_twice_identical": False}}}
     s = score(flat + movy, ctx)
     assert s["flat"]["n"] == 20 and s["movy"]["n"] == 20
     fs = s["flat"]["per_feature"]["f0_range"]["between_condition_spread"]
@@ -327,12 +362,15 @@ def demo():
     assert fs <= 1.0, fs
     assert ms >= 150.0, ms
     assert s["flat"]["context_sensitivity"]["identical"] is True
+    # a nondeterministic backend must NOT be read as context-sensitive
+    assert ctx["jittery"]["identical"] is None and ctx["jittery"]["status"] == "not-measured"
 
     # a system with no features at all must be not-measured, never 0
     s2 = score([{"system": "dead", "affect": "joy", "feature_error": "librosa missing"}], {})
     assert s2["dead"]["status"] == "not-measured" and s2["dead"]["n"] == 0, s2
     print(f"prosody scorer self-check OK  (flat spread {fs} Hz vs moving {ms} Hz; "
-          f"missing extractor reports not-measured, not zero)")
+          f"missing extractor reports not-measured, not zero; a nondeterministic "
+          f"backend reports not-measured rather than context-sensitive)")
 
 
 if __name__ == "__main__":
