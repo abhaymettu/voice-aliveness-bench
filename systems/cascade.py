@@ -22,6 +22,9 @@ backend, and differ only in *when* work is scheduled:
     cascade-fast        downstream runs inside the endpointer's 350 ms hangover,
                         armed after 80 ms of silence
     cascade-fast-tiny   same, plus the final ASR decode drops base.en -> tiny.en
+    cascade-fast-tiny-aggressive
+                        the extreme of the same axis: armed at 40 ms with the
+                        hangover cut to 250 ms
 
 Any difference between them across the five dimensions is attributable to
 scheduling, not to what the system is. That is a far stronger internal contrast
@@ -87,12 +90,22 @@ CONFIGS = {
     "cascade-serial": dict(fast=False, arm_ms=None, final_model="base.en", hangover=350.0),
     "cascade-fast": dict(fast=True, arm_ms=80.0, final_model="base.en", hangover=350.0),
     "cascade-fast-tiny": dict(fast=True, arm_ms=80.0, final_model="tiny.en", hangover=350.0),
+    # The most aggressive schedule that still holds up: arm at 40 ms and cut the
+    # endpointer's hangover from 350 to 250. Reported at 347.8 ms [338-450] in
+    # the sibling repo. It is the extreme end of the scheduling axis, not a
+    # recommendation -- a 250 ms hangover leaves less room for a real talker's
+    # pauses than anything else here, and this prompt set (TTS, 65 ms longest
+    # internal pause) cannot see that cost.
+    "cascade-fast-tiny-aggressive": dict(fast=True, arm_ms=40.0, final_model="tiny.en",
+                                         hangover=250.0),
 }
 
 DESCRIPTIONS = {
     "cascade-serial": "ASR(base.en) -> Llama-3.2-1B-4bit(MLX) -> piper, strictly serial",
     "cascade-fast": "same stack, downstream speculatively run inside the 350ms hangover (arm 80ms)",
     "cascade-fast-tiny": "fast path with the final decode on tiny.en instead of base.en",
+    "cascade-fast-tiny-aggressive":
+        "fast path, tiny.en, armed at 40ms with the hangover cut to 250ms",
 }
 
 

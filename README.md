@@ -256,9 +256,17 @@ output device stream, and every turn carries its own timestamp and loadavg.
   The five dimensions are motivated by conversation analysis, not by ratings collected in
   this repo. No LLM judge stands in for a person anywhere; if one were ever added it would be
   labelled as an LLM judge everywhere it appeared.
-- **The test talker is a TTS voice.** Its longest internal pause measures 65 ms, which is the
-  only reason an 80 ms speculation arm works. On real human speech it would cut people off.
-  **None of these numbers are validated on human speech.**
+- **The test talker is a TTS voice, and none of these numbers are validated on human
+  speech.** Every prompt here is piper-rendered, whose longest internal pause measures 65 ms.
+  What that does *not* mean, and an earlier draft of this file got wrong: a separate effort
+  (`~/Desktop/Playground/expressive-s2s`) ran 24 held-out CREMA-D human actor clips through
+  this same loop and found `--fast --arm 80` produced **3/24 false endpoints against 3/24 on
+  the serial control** — two of them the same clips. Arming added zero truncation, because
+  arming is not committing: a stale snapshot is thrown away and the turn falls back to the
+  serial path. Aggressive arming costs wasted compute, not cut-off talkers.
+  The real caveat is the endpointer itself, armed or not: it truncates about **1 in 8 real
+  human turns** (3/24), a failure mode this TTS-only prompt set cannot see at all — it
+  records 0 false endpoints on every system.
 - **Difficulty tiers are an a-priori design variable**, assigned before any system ran. They
   are a design choice, not a measurement of difficulty.
 - **Moshi (Kyutai full-duplex, MLX) is NOT-MEASURED.** Its weight download did not finish
