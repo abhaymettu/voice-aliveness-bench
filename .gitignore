@@ -2,9 +2,6 @@
 __pycache__/
 *.pyc
 models/
-audio/raw/
-runs/*.wav
-*.pt
-*.onnx
-*.safetensors
-.DS_Store
+# bulk audio: only the small demo set under web/audio is committed
+audio/
+results/raw/
