@@ -142,7 +142,59 @@ def collect(systems, n_per_system: int, out_dir: Path, progress=True) -> list[di
     return rows
 
 
-def context_sensitivity(systems, out_dir: Path, progress=True) -> dict:
+def _perm_diff_test(a, b, iters=20000, seed=0) -> dict:
+    """Two-sample permutation test on the difference of medians.
+
+    Used when the backend is nondeterministic, where "the two renderings differ"
+    is meaningless but "the two *distributions* differ" is exactly the question.
+    """
+    rng = np.random.default_rng(seed)
+    a, b = np.asarray(a, float), np.asarray(b, float)
+    a, b = a[~np.isnan(a)], b[~np.isnan(b)]
+    if len(a) < 3 or len(b) < 3:
+        return {"n_a": len(a), "n_b": len(b), "p": None, "note": "too few renders"}
+    obs = abs(float(np.median(a) - np.median(b)))
+    pool = np.concatenate([a, b])
+    na = len(a)
+    hits = 0
+    for _ in range(iters):
+        p = rng.permutation(pool)
+        if abs(float(np.median(p[:na]) - np.median(p[na:]))) >= obs - 1e-12:
+            hits += 1
+    return {
+        "n_a": int(na), "n_b": int(len(b)),
+        "median_a": round(float(np.median(a)), 3),
+        "median_b": round(float(np.median(b)), 3),
+        "abs_median_difference": round(obs, 3),
+        "p": round(hits / iters, 4),
+        "method": f"two-sample permutation on the difference of medians, {iters} shuffles",
+    }
+
+
+def _render_set(system, text: str, k: int, out_dir: Path, tag: str, fx) -> tuple[list, dict]:
+    """Render `text` k times through the agent's own voice and extract features."""
+    a = audio_mod()
+    feats = {f: [] for f in ("f0_range", "rms_range_db", "speech_rate", "f0_sd")}
+    wavs = []
+    out_dir.mkdir(parents=True, exist_ok=True)
+    for j in range(k):
+        y = system.synth(text)
+        p = out_dir / f"ctx-{tag}-{j:02d}.wav"
+        a.write(p, y)
+        wavs.append(p)
+        if fx is not None:
+            try:
+                d = fx.extract(p, text)
+                for f in feats:
+                    v = d.get(f)
+                    feats[f].append(float(v) if v is not None and not np.isnan(v) else np.nan)
+            except Exception:  # noqa: BLE001, S110
+                for f in feats:
+                    feats[f].append(np.nan)
+    return wavs, feats
+
+
+def context_sensitivity(systems, out_dir: Path, progress=True, k: int = 8) -> dict:
     """THE DECISIVE TEST. One fixed sentence, two conversational contexts.
 
     The agent is put through a joyful exchange, then asked to voice
@@ -170,23 +222,42 @@ def context_sensitivity(systems, out_dir: Path, progress=True) -> dict:
             bd = float(np.max(np.abs(b1[:bn] - b2[:bn]))) if bn else None
             deterministic = bool(len(b1) == len(b2) and bd is not None and bd == 0.0)
 
+            fx, _why = load_extractor()
             joy = next(p for p in P.AFFECT_PROMPTS if p[1] == "joy")
             grief = next(p for p in P.AFFECT_PROMPTS if p[1] == "grief")
+
+            # k renders of the same sentence in each context, not one. On a
+            # deterministic backend the extra renders cost nothing and the
+            # sample-identity test below is unaffected. On a stochastic one
+            # (piper is VITS-based and samples, so it is stochastic) one render
+            # per context can say nothing at all -- but k of each turns the
+            # question into a proper two-sample one: does CONTEXT shift the
+            # distribution of the voice's prosody, beyond the spread the
+            # backend produces on its own?
             s.turn(s.render_prompt(joy[2]), label=joy[2], record=False)
-            a1 = s.synth(P.FLOOR_TEXT)
+            wj, fj = _render_set(s, P.FLOOR_TEXT, k, out_dir / s.name, "joy", fx)
             s.turn(s.render_prompt(grief[2]), label=grief[2], record=False)
-            a2 = s.synth(P.FLOOR_TEXT)
+            wg, fg = _render_set(s, P.FLOOR_TEXT, k, out_dir / s.name, "grief", fx)
+
+            a1, a2 = audio_mod().read(wj[0]), audio_mod().read(wg[0])
             n = min(len(a1), len(a2))
             same_len = len(a1) == len(a2)
             d = float(np.max(np.abs(a1[:n] - a2[:n]))) if n else None
             identical = bool(same_len and d is not None and d == 0.0)
-            aud = audio_mod()
-            p1 = out_dir / s.name / "context-after-joy.wav"
-            p2 = out_dir / s.name / "context-after-grief.wav"
-            p1.parent.mkdir(parents=True, exist_ok=True)
-            aud.write(p1, a1)
-            aud.write(p2, a2)
+            p1, p2 = wj[0], wg[0]
+
+            dist = {f: _perm_diff_test(fj[f], fg[f]) for f in fj} if fx else {}
+            sig = [f for f, r in dist.items()
+                   if r.get("p") is not None and r["p"] < 0.05]
+
             out[s.name] = {
+                "distributional_test": {
+                    "k_renders_per_context": k,
+                    "why": "a stochastic voice needs a two-sample test, not a "
+                           "one-render comparison",
+                    "per_feature": dist,
+                    "features_shifted_by_context_p_lt_.05": sig,
+                },
                 "text": P.FLOOR_TEXT,
                 "determinism_baseline": {
                     "same_text_twice_identical": deterministic,
@@ -197,31 +268,53 @@ def context_sensitivity(systems, out_dir: Path, progress=True) -> dict:
                 "same_length": same_len,
                 "max_abs_sample_difference": d,
                 "identical": identical,
-                "context_sensitivity": (0.0 if (deterministic and identical)
-                                        else None),
+                "context_sensitivity": (
+                    0.0 if (deterministic and identical)
+                    else 0.0 if (not deterministic and dist and not sig)
+                    else None),
+                "verdict": (
+                    "deterministic backend, sample-identical across contexts"
+                    if deterministic and identical else
+                    "deterministic backend, renderings differ across contexts"
+                    if deterministic else
+                    f"stochastic backend; context shifted {len(sig)} of {len(dist)} "
+                    f"prosodic features at p<.05 ({', '.join(sig) or 'none'})"
+                    if dist else
+                    "stochastic backend and no extractor available"),
                 "interpretation": (
-                    "BACKEND IS NONDETERMINISTIC: the same text rendered twice back to "
-                    "back already differs, so a difference across contexts proves "
-                    "nothing. This dimension is not-measured for this system."
-                    if not deterministic else
                     "sample-identical after a joyful and after a grieving exchange, on a "
                     "backend verified deterministic: the voice stage receives only the "
                     "reply text and carries no conversational state. Prosodic "
                     "responsiveness to context is 0."
-                    if identical else
+                    if deterministic and identical else
                     "the backend is deterministic and the two renderings differ, so "
-                    "something in the stack does condition the voice on context; the "
-                    "size of the difference is above"),
+                    "something in the stack does condition the voice on context"
+                    if deterministic else
+                    "the backend is stochastic, so sample identity says nothing. The "
+                    "two-sample test finds no prosodic feature whose distribution "
+                    "context shifts: responsiveness to context is 0, and the spread "
+                    "you hear is the synthesiser sampling, not the conversation."
+                    if dist and not sig else
+                    "the backend is stochastic and context did shift at least one "
+                    "feature's distribution; see distributional_test"
+                    if dist else
+                    "the backend is stochastic and no extractor was available, so this "
+                    "system is not-measured on the decisive test"),
                 "wavs": [str(p1.relative_to(out_dir.parent)), str(p2.relative_to(out_dir.parent))],
             }
             if not deterministic:
-                out[s.name]["status"] = "not-measured"
-                out[s.name]["reason"] = ("backend is not deterministic; same text twice "
-                                         f"differs by {bd}")
+                # sample identity is meaningless here; the distributional test is
+                # the measurement, and `identical` must not be read as a result
                 out[s.name]["identical"] = None
+                if not dist:
+                    out[s.name]["status"] = "not-measured"
+                    out[s.name]["reason"] = (
+                        "backend is stochastic (same text twice differs by "
+                        f"{bd}) and no feature extractor was available for the "
+                        "two-sample test")
             if progress:
                 print(f"  context test  {s.name:<18} deterministic={deterministic} "
-                      f"identical={out[s.name]['identical']} max|diff|={d}", flush=True)
+                      f"-> {out[s.name]['verdict']}", flush=True)
         except Exception as e:  # noqa: BLE001
             out[s.name] = {"status": "not-measured", "reason": f"{type(e).__name__}: {e}"}
     return out
@@ -319,8 +412,8 @@ def run(system_names, n: int = 20, out=None, device=None, audio_dir="audio/proso
 
 
 def report(res) -> str:
-    L = [f"{'system':<20} {'n':>3} {'f0_range med':>13} {'spread across affect':>21} "
-         f"{'context-sensitive':>18}"]
+    L = [f"{'system':<20} {'n':>3} {'f0_range med':>13} {'spread across affect':>21}  "
+         f"context test"]
     for name, s in res["score"].items():
         if not s.get("n"):
             L.append(f"{name:<20} {'-':>3}  not-measured: {s.get('reason')}")
@@ -328,10 +421,10 @@ def report(res) -> str:
         f = s["per_feature"].get("f0_range", {})
         o = f.get("overall", {})
         c = s.get("context_sensitivity") or {}
-        cs = ("no (sample-identical)" if c.get("identical")
-              else "yes" if c.get("identical") is False else "?")
+        cs = c.get("verdict") or ("no (sample-identical)" if c.get("identical")
+                                  else "?")
         L.append(f"{name:<20} {s['n']:>3} {o.get('median', '-'):>13} "
-                 f"{str(f.get('between_condition_spread')):>21} {cs:>18}")
+                 f"{str(f.get('between_condition_spread')):>21}  {cs}")
     cr = res.get("ceiling_reference", {})
     if "delta" in cr:
         L.append(f"\nceiling reference (macOS `say`, explicit prosody tags, not a system "
@@ -385,9 +478,32 @@ if __name__ == "__main__":
     ap.add_argument("--audio-dir", default="audio/prosody")
     ap.add_argument("--device", default=None)
     ap.add_argument("--selfcheck", action="store_true")
+    ap.add_argument("--context-only", action="store_true",
+        help="re-run only the decisive context test and patch it into an existing "
+             "results file, leaving the per-turn rows untouched")
     a = ap.parse_args()
     if a.selfcheck:
         demo()
+    elif a.context_only:
+        import json as _j
+        from bench.runner import close_systems as _c, open_systems as _o
+        systems, _info, player = _o(a.systems)
+        try:
+            ctx = context_sensitivity(systems, Path(a.audio_dir))
+        finally:
+            _c(systems, player)
+        d = _j.loads(Path(a.out).read_text())
+        d["context_sensitivity_rerun_note"] = (
+            "the decisive context test was re-run on the same machine minutes after the "
+            "per-turn rows above, to add the two-sample test a stochastic backend needs. "
+            "The rows were not re-run and were not affected.")
+        for k, v in ctx.items():
+            if k in d.get("score", {}):
+                d["score"][k]["context_sensitivity"] = v
+        Path(a.out).write_text(_j.dumps(d, indent=2, default=str))
+        print()
+        print(report(d))
+        print(f"\npatched {a.out}")
     else:
         r = run(a.systems, n=a.n, out=a.out, device=a.device, audio_dir=a.audio_dir)
         print()

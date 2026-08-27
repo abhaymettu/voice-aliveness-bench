@@ -86,9 +86,10 @@ def build(results="results", figdir="figures", audiodir="audio",
         scell = (f'<b>{"re-prompts" if s["re_prompts"] else "never speaks"}</b><br>'
                  f'<span class="sub">{html.escape(s["verdict"][:70])}</span>'
                  if "n" in s else _cell(None))
-        pcell = (f'<b>{"none" if p.get("context_identical") else "some"}</b><br>'
-                 f'<span class="sub">{"sample-identical after joy and after grief" if p.get("context_identical") else "renderings differ"}</span>'
-                 if p.get("context_identical") is not None else _cell(None))
+        _cs = p.get("context_sensitivity")
+        pcell = (f'<b>{"none" if _cs == 0.0 else "some"}</b><br>'
+                 f'<span class="sub">{html.escape(str(p.get("context_verdict") or ""))[:90]}</span>'
+                 if _cs is not None else _cell(None))
         ncell = (f'<b>{n["n"] - n["n_dead_air"]}/{n["n"]}</b> gaps filled<br>'
                  f'<span class="sub">loudest frame {n["peak_dbfs_median"]} dBFS</span>'
                  if "n" in n else _cell(None))
@@ -294,7 +295,8 @@ def demo():
                                "rho_partialling_reply_length": -0.065},
                        "interrupt": {"n": 20, "n_yielded": 0, "n_heard": 0},
                        "silence": {"n": 21, "re_prompts": False, "verdict": "never speaks"},
-                       "prosody": {"context_identical": True},
+                       "prosody": {"context_sensitivity": 0.0, "context_identical": True,
+                                   "context_verdict": "deterministic backend, sample-identical"},
                        "nonverbal": {"n": 20, "n_dead_air": 20, "peak_dbfs_median": -240.0}},
                       {"system": "half-measured",
                        "gap": {"n": 25, "median_ms": 402.0, "iqr_ms": [371, 561],
@@ -334,7 +336,7 @@ def demo():
         # a missing dimension must read as not measured, never as a zero
         assert t.count('class="nm"') == 4, (
             "the four unmeasured dimensions of half-measured did not render as "
-            f"not-measured (found {t.count(chr(34)+chr(34))})")
+            f"not-measured (found {t.count(chr(34)+'class=' + chr(34))})")
         assert "0/0" not in t and ">0<" not in t, "a missing dimension leaked a zero"
         assert re.search(r"<title>.*Voice Aliveness Bench.*</title>", t)
         assert t.count("data:audio/wav;base64,") == 1, (

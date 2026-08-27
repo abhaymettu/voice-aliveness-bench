@@ -106,6 +106,9 @@ def table(res: dict) -> list[dict]:
                 "f0_range_spread_across_affect_hz": f0.get("between_condition_spread"),
                 "context_identical": ctx.get("identical"),
                 "context_sensitivity": ctx.get("context_sensitivity"),
+                "context_verdict": ctx.get("verdict"),
+                "context_deterministic_backend":
+                    (ctx.get("determinism_baseline") or {}).get("same_text_twice_identical"),
             }
         else:
             r["prosody"] = {"status": "not-measured",
@@ -171,8 +174,8 @@ def render(agg: dict) -> str:
         nv = r["nonverbal"]
         nvv = f"{nv['n'] - nv['n_dead_air']}/{nv['n']}" if "n" in nv else "not-measured"
         p = r["prosody"]
-        pv = ("none" if p.get("context_identical") else
-              "some" if p.get("context_identical") is False else "not-measured")
+        cs = p.get("context_sensitivity")
+        pv = ("none" if cs == 0.0 else "some" if cs else "not-measured")
         L.append(f"{r['system']:<20} {gs:>20} {rho:>9} {rpl:>8} {iv:>13} {nvv:>11} {pv:>12}")
     L.append("")
     for nm in agg["not_measured"]:

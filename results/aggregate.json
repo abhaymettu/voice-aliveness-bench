@@ -3,8 +3,8 @@
   "dimensions_run": {
     "gap": "ok",
     "interrupt": "ok",
-    "silence": "not-run",
-    "prosody": "not-run",
+    "silence": "ok",
+    "prosody": "ok",
     "nonverbal": "ok"
   },
   "provenance": {
@@ -39,20 +39,41 @@
         "wer": 0.0899
       },
       "interrupt": {
-        "n": 16,
+        "n": 25,
         "n_yielded": 0,
         "yield_rate": 0.0,
         "n_heard": 0,
-        "talked_over_median_ms": 2013.3,
+        "talked_over_median_ms": 1992.6,
         "verdict": "never yields: output ran to the end of the reply on every landed barge-in, and the barge-in never reached the transcript"
       },
       "silence": {
-        "status": "not-measured",
-        "reason": "not run"
+        "n": 21,
+        "re_prompts": false,
+        "hangs": false,
+        "verdict": "never speaks into silence; falls over instead -- 21/21 probes raised",
+        "by_probe": {
+          "cold": {
+            "outcomes": {
+              "error": 1
+            },
+            "median_ms": 8247.1
+          },
+          "post-reply": {
+            "outcomes": {
+              "error": 20
+            },
+            "median_ms": 8240.0
+          }
+        }
       },
       "prosody": {
-        "status": "not-measured",
-        "reason": "not run"
+        "n": 20,
+        "f0_range_median_hz": 155.9,
+        "f0_range_spread_across_affect_hz": 55.541,
+        "context_identical": null,
+        "context_sensitivity": 0.0,
+        "context_verdict": "stochastic backend; context shifted 0 of 4 prosodic features at p<.05 (none)",
+        "context_deterministic_backend": false
       },
       "nonverbal": {
         "n": 20,
@@ -82,20 +103,41 @@
         "wer": 0.1006
       },
       "interrupt": {
-        "n": 13,
+        "n": 21,
         "n_yielded": 0,
         "yield_rate": 0.0,
         "n_heard": 0,
-        "talked_over_median_ms": 1958.9,
+        "talked_over_median_ms": 1991.9,
         "verdict": "never yields: output ran to the end of the reply on every landed barge-in, and the barge-in never reached the transcript"
       },
       "silence": {
-        "status": "not-measured",
-        "reason": "not run"
+        "n": 21,
+        "re_prompts": false,
+        "hangs": false,
+        "verdict": "never speaks into silence; falls over instead -- 21/21 probes raised",
+        "by_probe": {
+          "cold": {
+            "outcomes": {
+              "error": 1
+            },
+            "median_ms": 8114.1
+          },
+          "post-reply": {
+            "outcomes": {
+              "error": 20
+            },
+            "median_ms": 8128.1
+          }
+        }
       },
       "prosody": {
-        "status": "not-measured",
-        "reason": "not run"
+        "n": 20,
+        "f0_range_median_hz": 152.8,
+        "f0_range_spread_across_affect_hz": 59.635,
+        "context_identical": null,
+        "context_sensitivity": 0.0,
+        "context_verdict": "stochastic backend; context shifted 0 of 4 prosodic features at p<.05 (none)",
+        "context_deterministic_backend": false
       },
       "nonverbal": {
         "n": 20,
@@ -125,20 +167,41 @@
         "wer": 0.0999
       },
       "interrupt": {
-        "n": 17,
+        "n": 27,
         "n_yielded": 0,
         "yield_rate": 0.0,
         "n_heard": 0,
-        "talked_over_median_ms": 2057.4,
+        "talked_over_median_ms": 1956.8,
         "verdict": "never yields: output ran to the end of the reply on every landed barge-in, and the barge-in never reached the transcript"
       },
       "silence": {
-        "status": "not-measured",
-        "reason": "not run"
+        "n": 21,
+        "re_prompts": false,
+        "hangs": false,
+        "verdict": "never speaks into silence; falls over instead -- 21/21 probes raised",
+        "by_probe": {
+          "cold": {
+            "outcomes": {
+              "error": 1
+            },
+            "median_ms": 8227.2
+          },
+          "post-reply": {
+            "outcomes": {
+              "error": 20
+            },
+            "median_ms": 8237.5
+          }
+        }
       },
       "prosody": {
-        "status": "not-measured",
-        "reason": "not run"
+        "n": 20,
+        "f0_range_median_hz": 153.3,
+        "f0_range_spread_across_affect_hz": 71.266,
+        "context_identical": null,
+        "context_sensitivity": 0.0,
+        "context_verdict": "stochastic backend; context shifted 0 of 4 prosodic features at p<.05 (none)",
+        "context_deterministic_backend": false
       },
       "nonverbal": {
         "n": 20,
@@ -148,6 +211,34 @@
         "n_dead_air": 20,
         "verdict": "dead air on 20/20 turns: nothing above -55.0 dBFS in any measured gap",
         "demo_wav": "nonverbal/cascade-serial-gap-demo.wav"
+      }
+    },
+    {
+      "system": "cascade-serial-say",
+      "gap": {
+        "status": "not-measured",
+        "reason": "this system was not part of that dimension's run"
+      },
+      "interrupt": {
+        "status": "not-measured",
+        "reason": "this system was not part of that dimension's run"
+      },
+      "silence": {
+        "status": "not-measured",
+        "reason": "this system was not part of that dimension's run"
+      },
+      "prosody": {
+        "n": 20,
+        "f0_range_median_hz": 103.3,
+        "f0_range_spread_across_affect_hz": 17.717,
+        "context_identical": true,
+        "context_sensitivity": 0.0,
+        "context_verdict": "deterministic backend, sample-identical across contexts",
+        "context_deterministic_backend": true
+      },
+      "nonverbal": {
+        "status": "not-measured",
+        "reason": "this system was not part of that dimension's run"
       }
     }
   ],
@@ -163,9 +254,13 @@
       "n_incomplete_files": 2,
       "wrapper_dir": "/Users/abhay/Desktop/Playground/fullduplex-voice",
       "wrapper_files": [
+        "cascade_bargein.py",
         "cascade_baseline.py",
+        "compare.py",
+        "demo.py",
         "floor.py",
-        "gap.py"
+        "gap.py",
+        "moshi_run.py"
       ],
       "note": "no second download was started; bandwidth was the binding constraint and the sibling pull was already in flight",
       "why_it_matters": "the only system in reach that is architecturally able to score above zero on interruption handling and non-verbal presence; every cascade config here cannot, by construction"
@@ -236,6 +331,58 @@
       "valid": true,
       "recomputed_note": "the control was re-run minutes after the turn data, on the same machine, after a window-location bug was found and fixed; the per-turn measurements above were not affected by that bug and were not re-run"
     },
-    "prosody_ceiling": null
+    "prosody_ceiling": {
+      "note": "macOS `say` under explicit prosody tags; a reference scale, not a system under test",
+      "conditions": {
+        "flat": {
+          "params": {
+            "rate": 180,
+            "pbas": 40,
+            "pmod": 10,
+            "volm": 1.0
+          },
+          "features": {
+            "f0_range": 69.799,
+            "f0_sd": 18.216,
+            "f0_mean": 124.285,
+            "rms_range_db": 25.302,
+            "rms_sd_db": 7.825,
+            "speech_rate": 3.622,
+            "articulation_rate": 3.674,
+            "pause_frac": 0.0
+          },
+          "wav": "prosody/ceiling-flat.wav"
+        },
+        "animated": {
+          "params": {
+            "rate": 210,
+            "pbas": 62,
+            "pmod": 90,
+            "volm": 1.0
+          },
+          "features": {
+            "f0_range": 183.956,
+            "f0_sd": 47.58,
+            "f0_mean": 335.205,
+            "rms_range_db": 23.649,
+            "rms_sd_db": 7.434,
+            "speech_rate": 4.072,
+            "articulation_rate": 4.08,
+            "pause_frac": 0.0
+          },
+          "wav": "prosody/ceiling-animated.wav"
+        }
+      },
+      "delta": {
+        "f0_range": 114.157,
+        "f0_sd": 29.364,
+        "f0_mean": 210.92,
+        "rms_range_db": -1.653,
+        "rms_sd_db": -0.391,
+        "speech_rate": 0.45,
+        "articulation_rate": 0.406,
+        "pause_frac": 0.0
+      }
+    }
   }
 }

@@ -167,9 +167,10 @@ def fig_dimensions(agg: dict, out_dir, theme) -> Path | None:
         else:
             vals.append(np.nan); lab.append("not\nmeasured")
         p = r["prosody"]
-        if p.get("context_identical") is not None:
-            vals.append(0.0 if p["context_identical"] else 1.0)
-            lab.append("identical" if p["context_identical"] else "differs")
+        cs = p.get("context_sensitivity")
+        if cs is not None:
+            vals.append(0.0 if cs == 0.0 else 1.0)
+            lab.append("no context\neffect" if cs == 0.0 else "context\neffect")
         else:
             vals.append(np.nan); lab.append("not\nmeasured")
         nv = r["nonverbal"]
