@@ -2,6 +2,12 @@
 __pycache__/
 *.pyc
 models/
-# bulk audio: only the small demo set under web/audio is committed
-audio/
 results/raw/
+
+# Bulk audio stays out; the small demo set under audio/nonverbal is committed
+# so the repo carries something listenable without the web page.
+audio/*
+!audio/nonverbal/
+audio/nonverbal/*
+!audio/nonverbal/*-gap-demo.wav
+!audio/nonverbal/control-*.wav

@@ -105,9 +105,9 @@ def build(results="results", figdir="figures", audiodir="audio",
     clips = []
     for r in rows:
         w = (r["nonverbal"] or {}).get("demo_wav")
-        if w and (A.parent / w).is_file():
+        if w and (A / w).is_file():
             g = r["gap"].get("median_ms")
-            clips.append(_audio(A.parent / w, r["system"],
+            clips.append(_audio(A / w, r["system"],
                                 f"one real gap and the reply after it"
                                 + (f" (median gap {g:.0f} ms)" if g else "")))
     ctrl = []
@@ -116,7 +116,7 @@ def build(results="results", figdir="figures", audiodir="audio",
         c = cues.get(cue)
         if not c or not c.get("wav"):
             continue
-        p = A.parent / c["wav"]
+        p = A / c["wav"]
         note = ("dead air, the control for a gap with nothing in it"
                 if cue == "none" else
                 f'loudest frame {c.get("peak_dbfs")} dBFS')
@@ -306,6 +306,21 @@ def demo():
                        "nonverbal": {"status": "not-measured"}}],
             "not_measured": [{"name": "moshi-mlx-q4", "status": "not-measured",
                               "reason": "weights incomplete"}]}))
+        # a real wav on disk, so the embedding path is exercised rather than
+        # skipped -- the first version of this silently embedded nothing
+        # because it joined the audio path against the wrong parent
+        AD = Path(d) / "audio" / "nonverbal"
+        AD.mkdir(parents=True)
+        import struct
+        pcm = b"".join(struct.pack("<h", 0) for _ in range(2205))
+        hdr = (b"RIFF" + struct.pack("<I", 36 + len(pcm)) + b"WAVEfmt " +
+               struct.pack("<IHHIIHH", 16, 1, 1, 22050, 44100, 2, 16) +
+               b"data" + struct.pack("<I", len(pcm)))
+        (AD / "demo.wav").write_bytes(hdr + pcm)
+        agg_p = R / "aggregate.json"
+        a = json.loads(agg_p.read_text())
+        a["table"][0]["nonverbal"]["demo_wav"] = "nonverbal/demo.wav"
+        agg_p.write_text(json.dumps(a))
         out = Path(d) / "web/index.html"
         p = build(R, Path(d) / "figures", Path(d) / "audio", out)
         t = p.read_text()
@@ -322,6 +337,9 @@ def demo():
             f"not-measured (found {t.count(chr(34)+chr(34))})")
         assert "0/0" not in t and ">0<" not in t, "a missing dimension leaked a zero"
         assert re.search(r"<title>.*Voice Aliveness Bench.*</title>", t)
+        assert t.count("data:audio/wav;base64,") == 1, (
+            "the demo wav on disk did not get embedded; check the audio path join")
+        assert "<audio controls" in t
     print(f"web self-check OK  (self-contained, {len(t) / 1024:.0f} KB with no figures "
           f"or audio, dark mode present, missing dims read as not measured)")
 
