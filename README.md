@@ -291,17 +291,21 @@ committed under `audio/`.
 
 ---
 
-## Environment note (documented fallback)
+## Environment note
 
-The night this was built, bandwidth was saturated by a sibling repo's 5 GB weight download.
-This repo's own `.venv` finished installing the analysis stack (numpy, scipy, soundfile,
-librosa, praat-parselmouth) but **`mlx-metal`, `faster-whisper`, `sounddevice` and `piper-tts`
-did not finish downloading into it**.
+`.venv` is complete and `./run_bench.py` runs directly with no `PYTHONPATH`:
 
-Rather than block, the documented fallback was used: runs execute on the sibling
-`aliveness-threshold` venv's interpreter — which already had the agent stack — with this
-repo's `.venv/lib/python3.12/site-packages` on `PYTHONPATH` for the two extraction
-libraries. Both are CPython 3.12, macOS arm64, so the ABI matches.
+```bash
+.venv/bin/python run_bench.py selfcheck     # 10/10 pass
+```
+
+**The runs in `results/` did not all use it.** For most of the night bandwidth was saturated
+by a sibling repo's 5 GB weight download, and `.venv` had the analysis stack (numpy, scipy,
+soundfile, librosa, praat-parselmouth) long before `mlx-metal`, `faster-whisper`,
+`sounddevice` and `piper-tts` finished landing. Rather than block, the documented fallback
+was used: runs executed on the sibling `aliveness-threshold` venv's interpreter, which
+already had the agent stack, with this repo's `.venv` site-packages on `PYTHONPATH` for the
+two extraction libraries. Both are CPython 3.12 macOS arm64, so the ABI matches.
 
 ```bash
 A=~/Desktop/Playground/aliveness-threshold/.venv/bin/python
@@ -309,6 +313,5 @@ PYTHONPATH=.:$PWD/.venv/lib/python3.12/site-packages $A run_bench.py all
 ```
 
 Every results file records `provenance.executable` and `provenance.sys_path_head`, so which
-interpreter produced a given number is checkable rather than remembered. Once `.venv`
-completes, `./run_bench.py` works directly with no `PYTHONPATH` and the fallback can be
-dropped.
+interpreter produced a given number is checkable rather than remembered. The install
+completed late in the session; results written after that point use `.venv` directly.
