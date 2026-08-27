@@ -278,8 +278,8 @@ section{border-top:1px solid var(--rule);margin-top:58px;padding-top:32px}
 .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:20px 0 0;
   border:1px solid var(--line);border-radius:13px;background:var(--panel);
   box-shadow:var(--shadow)}
-table{border-collapse:collapse;width:100%;min-width:1080px;font-size:14px}
-th,td{text-align:left;padding:13px 14px;border-bottom:1px solid var(--line);
+table{border-collapse:collapse;width:100%;min-width:1000px;font-size:14px}
+th,td{text-align:left;padding:13px 11px;border-bottom:1px solid var(--line);
   vertical-align:top}
 thead th{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.08em;
   text-transform:uppercase;color:var(--dim);font-weight:500;
