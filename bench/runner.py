@@ -41,8 +41,16 @@ def open_systems(names, device=None, tts_backend: str = "auto"):
     systems, info = [], {}
     for n in names:
         try:
-            if n in CASCADE_CONFIGS:
-                s = Cascade(n, device=device, tts_backend=tts_backend, player=player)
+            # "<config>-say" is the same config speaking through macOS `say`
+            # instead of piper. A TTS backend swap is a different system under
+            # test: it changes the voice, the synthesis latency and everything
+            # dimension 4 measures, while leaving the ASR and LM stages alone.
+            base, backend = n, tts_backend
+            if n.endswith("-say"):
+                base, backend = n[: -len("-say")], "say"
+            if base in CASCADE_CONFIGS:
+                s = Cascade(base, device=device, tts_backend=backend, player=player)
+                s.name = n  # report under the name that was asked for
             else:
                 raise ValueError(f"no adapter registered for system {n!r}")
             opened = s.open()

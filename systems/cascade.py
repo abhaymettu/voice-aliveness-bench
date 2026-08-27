@@ -109,6 +109,9 @@ class Cascade:
         if name not in CONFIGS:
             raise ValueError(f"unknown cascade config {name!r}; have {list(CONFIGS)}")
         self.name = name
+        # the runner may rename an instance (e.g. "cascade-serial-say"), so the
+        # config it was built from is kept separately for lookups
+        self.cfg_name = name
         self.cfg = CONFIGS[name]
         self.device = device
         self.tts_backend = tts_backend
@@ -167,7 +170,9 @@ class Cascade:
         return {
             "name": self.name,
             "kind": self.kind,
-            "description": DESCRIPTIONS[self.name],
+            "config_name": self.cfg_name,
+            "description": DESCRIPTIONS[self.cfg_name],
+            "tts_backend_requested": self.tts_backend,
             "duplex": self.duplex,
             "config": dict(self.cfg),
             "source_repo": str(ALIVENESS),
