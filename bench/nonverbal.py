@@ -130,11 +130,19 @@ def positive_control(out_dir: Path) -> dict:
                 "What time do you close on Sunday?", "We close at six on Sundays.",
                 800.0, cue, str(p))
             x = a.read(p)
-            # locate the gap the same way the live path does: agent speech onset
-            # is the start of the last segment, the gap is the 800 ms before it
-            segs = a.segments(x, merge_gap_ms=30.0, min_len_ms=20.0)
-            onset = segs[-1][0]
-            g = x[a.samples(onset - 800.0) : a.samples(onset)]
+            # Use the exchange's OWN measured landmarks. Locating the gap as
+            # "800 ms before the last speech segment" is wrong whenever the
+            # response contains an internal pause longer than merge_gap_ms: the
+            # response splits, the last segment is its tail, and the window
+            # swallows most of the reply. That bug made cue="none" read as
+            # -7.6 dBFS, and the valid flag below is what caught it.
+            v = info["verification"]
+            p_off = v.get("measured_prompt_offset_ms")
+            r_on = v.get("measured_response_onset_ms")
+            if p_off is None or r_on is None:
+                rows[cue] = {"detected": None, "reason": "landmarks unverified"}
+                continue
+            g = x[a.samples(p_off) : a.samples(r_on - GUARD_MS)]
             r = a.frame_rms(g, frame_ms=FRAME_MS)
             above = r >= 10 ** (ABS_FLOOR_DBFS / 20.0)
             gs = a.segments(g, merge_gap_ms=30.0, min_len_ms=20.0)
@@ -143,6 +151,7 @@ def positive_control(out_dir: Path) -> dict:
                 "peak_dbfs": round(20 * float(np.log10(max(float(r.max()), 1e-12))), 1),
                 "n_events": len(gs),
                 "detected": bool(above.any()),
+                "gap_window_ms": round(r_on - GUARD_MS - p_off, 1),
                 "cue_duration_ms": round(info["cue_duration_ms"], 1),
                 "cue_source": info["cue_source"],
                 "wav": str(p.relative_to(out_dir.parent)),
