@@ -1,16 +1,25 @@
 {
   "dimension": "silence behaviour",
   "provenance": {
-    "run_at": "2026-08-27T00:40:36",
+    "run_at": "2026-08-27T02:03:08",
     "host": "Abhays-MacBook-Pro",
     "platform": "Darwin 25.5.0 arm64",
     "python": "3.12.13",
-    "bench_sha": "6138e12-dirty",
+    "executable": "/Users/abhay/Desktop/Playground/voice-aliveness-bench/.venv/bin/python",
+    "sys_path_head": [
+      "/Users/abhay/Desktop/Playground/aliveness-threshold",
+      "/Users/abhay/Desktop/Playground/voice-aliveness-bench",
+      "/Users/abhay/Desktop/Playground/voice-aliveness-bench/bench",
+      "/Users/abhay/Desktop/Playground/voice-aliveness-bench",
+      "/Users/abhay/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python312.zip",
+      "/Users/abhay/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12"
+    ],
+    "bench_sha": "da0b96f",
     "aliveness_sha": "0d202a6",
     "loadavg_start": [
-      5.66,
-      5.11,
-      4.96
+      3.3,
+      3.71,
+      3.45
     ]
   },
   "design": {
@@ -22,7 +31,9 @@
     "cascade-serial": {
       "name": "cascade-serial",
       "kind": "local cascade (ASR -> LM -> TTS)",
+      "config_name": "cascade-serial",
       "description": "ASR(base.en) -> Llama-3.2-1B-4bit(MLX) -> piper, strictly serial",
+      "tts_backend_requested": "auto",
       "duplex": false,
       "config": {
         "fast": false,
@@ -32,8 +43,8 @@
       },
       "source_repo": "/Users/abhay/Desktop/Playground/aliveness-threshold",
       "source_note": "imported, not vendored; that repo is unmodified by this one",
-      "model_load_ms": 2782.4,
-      "warmup_ms": 548.6,
+      "model_load_ms": 5094.3,
+      "warmup_ms": 951.3,
       "tts": {
         "backend": "piper",
         "voice": "/Users/abhay/Desktop/Playground/aliveness-threshold/models/piper-live/en_US-lessac-medium.onnx"
@@ -51,7 +62,9 @@
     "cascade-fast": {
       "name": "cascade-fast",
       "kind": "local cascade (ASR -> LM -> TTS)",
+      "config_name": "cascade-fast",
       "description": "same stack, downstream speculatively run inside the 350ms hangover (arm 80ms)",
+      "tts_backend_requested": "auto",
       "duplex": false,
       "config": {
         "fast": true,
@@ -61,8 +74,8 @@
       },
       "source_repo": "/Users/abhay/Desktop/Playground/aliveness-threshold",
       "source_note": "imported, not vendored; that repo is unmodified by this one",
-      "model_load_ms": 1616.9,
-      "warmup_ms": 533.2,
+      "model_load_ms": 2091.4,
+      "warmup_ms": 549.9,
       "tts": {
         "backend": "piper",
         "voice": "/Users/abhay/Desktop/Playground/aliveness-threshold/models/piper-live/en_US-lessac-medium.onnx"
@@ -80,7 +93,9 @@
     "cascade-fast-tiny": {
       "name": "cascade-fast-tiny",
       "kind": "local cascade (ASR -> LM -> TTS)",
+      "config_name": "cascade-fast-tiny",
       "description": "fast path with the final decode on tiny.en instead of base.en",
+      "tts_backend_requested": "auto",
       "duplex": false,
       "config": {
         "fast": true,
@@ -90,8 +105,8 @@
       },
       "source_repo": "/Users/abhay/Desktop/Playground/aliveness-threshold",
       "source_note": "imported, not vendored; that repo is unmodified by this one",
-      "model_load_ms": 1824.6,
-      "warmup_ms": 411.3,
+      "model_load_ms": 2878.1,
+      "warmup_ms": 430.6,
       "tts": {
         "backend": "piper",
         "voice": "/Users/abhay/Desktop/Playground/aliveness-threshold/models/piper-live/en_US-lessac-medium.onnx"
@@ -101,6 +116,37 @@
         "voice": "/Users/abhay/Desktop/Playground/aliveness-threshold/models/piper-live/en_US-lessac-medium.onnx"
       },
       "asr_final": "tiny.en",
+      "asr_partial": "tiny.en",
+      "lm": "mlx-community/Llama-3.2-1B-Instruct-4bit",
+      "output_device": "MacBook Pro Speakers",
+      "output_device_latency_ms": 42.0
+    },
+    "cascade-serial-say": {
+      "name": "cascade-serial-say",
+      "kind": "local cascade (ASR -> LM -> TTS)",
+      "config_name": "cascade-serial",
+      "description": "ASR(base.en) -> Llama-3.2-1B-4bit(MLX) -> piper, strictly serial",
+      "tts_backend_requested": "say",
+      "duplex": false,
+      "config": {
+        "fast": false,
+        "arm_ms": null,
+        "final_model": "base.en",
+        "hangover": 350.0
+      },
+      "source_repo": "/Users/abhay/Desktop/Playground/aliveness-threshold",
+      "source_note": "imported, not vendored; that repo is unmodified by this one",
+      "model_load_ms": 1317.1,
+      "warmup_ms": 1510.1,
+      "tts": {
+        "backend": "say",
+        "voice": null
+      },
+      "prompt_tts": {
+        "backend": "piper",
+        "voice": "/Users/abhay/Desktop/Playground/aliveness-threshold/models/piper-live/en_US-lessac-medium.onnx"
+      },
+      "asr_final": "base.en",
       "asr_partial": "tiny.en",
       "lm": "mlx-community/Llama-3.2-1B-Instruct-4bit",
       "output_device": "MacBook Pro Speakers",
@@ -115,7 +161,7 @@
     "post-reply": "a normal exchange completes, then the next stream is silence"
   },
   "measurement": "output audio during the silence window comes from the recorded device callback; a re-prompt is audible, so it is answered with audio",
-  "elapsed_s": 839.3,
+  "elapsed_s": 1128.7,
   "score": {
     "cascade-fast": {
       "n": 21,
@@ -127,13 +173,13 @@
           },
           "time_to_outcome_ms": {
             "n": 1,
-            "median": 8247.1,
-            "p25": 8247.1,
-            "p75": 8247.1,
+            "median": 8224.7,
+            "p25": 8224.7,
+            "p75": 8224.7,
             "iqr": 0.0,
-            "min": 8247.1,
-            "max": 8247.1,
-            "mean": 8247.1,
+            "min": 8224.7,
+            "max": 8224.7,
+            "mean": 8224.7,
             "sd": 0.0
           },
           "n_re_prompted": 0,
@@ -160,14 +206,14 @@
           },
           "time_to_outcome_ms": {
             "n": 20,
-            "median": 8240.0,
-            "p25": 8233.1,
-            "p75": 8243.6,
-            "iqr": 10.5,
-            "min": 8227.1,
-            "max": 8282.1,
-            "mean": 8240.4,
-            "sd": 11.8
+            "median": 8224.2,
+            "p25": 8220.8,
+            "p75": 8229.5,
+            "iqr": 8.7,
+            "min": 8216.7,
+            "max": 8236.8,
+            "mean": 8225.0,
+            "sd": 5.2
           },
           "n_re_prompted": 0,
           "re_prompt_rate": 0.0,
@@ -201,13 +247,13 @@
           },
           "time_to_outcome_ms": {
             "n": 1,
-            "median": 8114.1,
-            "p25": 8114.1,
-            "p75": 8114.1,
+            "median": 8110.0,
+            "p25": 8110.0,
+            "p75": 8110.0,
             "iqr": 0.0,
-            "min": 8114.1,
-            "max": 8114.1,
-            "mean": 8114.1,
+            "min": 8110.0,
+            "max": 8110.0,
+            "mean": 8110.0,
             "sd": 0.0
           },
           "n_re_prompted": 0,
@@ -234,14 +280,14 @@
           },
           "time_to_outcome_ms": {
             "n": 20,
-            "median": 8128.1,
-            "p25": 8121.1,
-            "p75": 8130.8,
-            "iqr": 9.7,
-            "min": 8108.6,
-            "max": 8141.8,
-            "mean": 8125.8,
-            "sd": 8.0
+            "median": 8109.9,
+            "p25": 8107.0,
+            "p75": 8118.9,
+            "iqr": 11.8,
+            "min": 8101.9,
+            "max": 8127.6,
+            "mean": 8112.2,
+            "sd": 7.4
           },
           "n_re_prompted": 0,
           "re_prompt_rate": 0.0,
@@ -275,13 +321,13 @@
           },
           "time_to_outcome_ms": {
             "n": 1,
-            "median": 8227.2,
-            "p25": 8227.2,
-            "p75": 8227.2,
+            "median": 8219.2,
+            "p25": 8219.2,
+            "p75": 8219.2,
             "iqr": 0.0,
-            "min": 8227.2,
-            "max": 8227.2,
-            "mean": 8227.2,
+            "min": 8219.2,
+            "max": 8219.2,
+            "mean": 8219.2,
             "sd": 0.0
           },
           "n_re_prompted": 0,
@@ -308,14 +354,88 @@
           },
           "time_to_outcome_ms": {
             "n": 20,
-            "median": 8237.5,
-            "p25": 8231.1,
-            "p75": 8246.7,
-            "iqr": 15.6,
-            "min": 8224.2,
-            "max": 8251.3,
-            "mean": 8238.0,
-            "sd": 8.3
+            "median": 8227.3,
+            "p25": 8224.2,
+            "p75": 8234.1,
+            "iqr": 9.8,
+            "min": 8218.0,
+            "max": 8299.8,
+            "mean": 8232.1,
+            "sd": 17.5
+          },
+          "n_re_prompted": 0,
+          "re_prompt_rate": 0.0,
+          "agent_audio_ms": {
+            "n": 20,
+            "median": 0.0,
+            "p25": 0.0,
+            "p75": 0.0,
+            "iqr": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "mean": 0.0,
+            "sd": 0.0
+          },
+          "errors": [
+            "RuntimeError: no speech found in captured input; nothing to time against"
+          ]
+        }
+      },
+      "verdict": "never speaks into silence; falls over instead -- 21/21 probes raised",
+      "re_prompts": false,
+      "hangs": false
+    },
+    "cascade-serial-say": {
+      "n": 21,
+      "by_probe": {
+        "cold": {
+          "n": 1,
+          "outcomes": {
+            "error": 1
+          },
+          "time_to_outcome_ms": {
+            "n": 1,
+            "median": 8227.0,
+            "p25": 8227.0,
+            "p75": 8227.0,
+            "iqr": 0.0,
+            "min": 8227.0,
+            "max": 8227.0,
+            "mean": 8227.0,
+            "sd": 0.0
+          },
+          "n_re_prompted": 0,
+          "re_prompt_rate": 0.0,
+          "agent_audio_ms": {
+            "n": 1,
+            "median": 0.0,
+            "p25": 0.0,
+            "p75": 0.0,
+            "iqr": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "mean": 0.0,
+            "sd": 0.0
+          },
+          "errors": [
+            "RuntimeError: no speech found in captured input; nothing to time against"
+          ]
+        },
+        "post-reply": {
+          "n": 20,
+          "outcomes": {
+            "error": 20
+          },
+          "time_to_outcome_ms": {
+            "n": 20,
+            "median": 8229.2,
+            "p25": 8227.1,
+            "p75": 8236.9,
+            "iqr": 9.8,
+            "min": 8221.9,
+            "max": 8435.2,
+            "mean": 8240.6,
+            "sd": 46.1
           },
           "n_re_prompted": 0,
           "re_prompt_rate": 0.0,
@@ -347,88 +467,7 @@
       "prompt_id": "t1a",
       "preceding_turn": {
         "reply": "4",
-        "gap_ms": 758.36
-      },
-      "window_s": 8.0,
-      "outcome": "error",
-      "time_to_outcome_ms": 8246.6,
-      "hung": false,
-      "guard_s": 12.0,
-      "agent_audio_ms": 0.0,
-      "agent_speech_onset_ms": null,
-      "output_peak_dbfs": -240.0,
-      "re_prompted": false,
-      "error": "RuntimeError: no speech found in captured input; nothing to time against",
-      "reply": null,
-      "transcript": null,
-      "t_wall": "00:26:49",
-      "loadavg": [
-        3.58,
-        4.86,
-        5.3
-      ]
-    },
-    {
-      "system": "cascade-fast",
-      "probe": "post-reply",
-      "prompt_id": "t1a",
-      "preceding_turn": {
-        "reply": "4",
-        "gap_ms": 510.53
-      },
-      "window_s": 8.0,
-      "outcome": "error",
-      "time_to_outcome_ms": 8236.2,
-      "hung": false,
-      "guard_s": 12.0,
-      "agent_audio_ms": 0.0,
-      "agent_speech_onset_ms": null,
-      "output_peak_dbfs": -240.0,
-      "re_prompted": false,
-      "error": "RuntimeError: no speech found in captured input; nothing to time against",
-      "reply": null,
-      "transcript": null,
-      "t_wall": "00:27:00",
-      "loadavg": [
-        3.33,
-        4.77,
-        5.26
-      ]
-    },
-    {
-      "system": "cascade-fast-tiny",
-      "probe": "post-reply",
-      "prompt_id": "t1a",
-      "preceding_turn": {
-        "reply": "4",
-        "gap_ms": 375.28
-      },
-      "window_s": 8.0,
-      "outcome": "error",
-      "time_to_outcome_ms": 8115.5,
-      "hung": false,
-      "guard_s": 12.0,
-      "agent_audio_ms": 0.0,
-      "agent_speech_onset_ms": null,
-      "output_peak_dbfs": -240.0,
-      "re_prompted": false,
-      "error": "RuntimeError: no speech found in captured input; nothing to time against",
-      "reply": null,
-      "transcript": null,
-      "t_wall": "00:27:11",
-      "loadavg": [
-        3.27,
-        4.71,
-        5.23
-      ]
-    },
-    {
-      "system": "cascade-serial",
-      "probe": "post-reply",
-      "prompt_id": "t2a",
-      "preceding_turn": {
-        "reply": "Paris.",
-        "gap_ms": 746.86
+        "gap_ms": 778.3
       },
       "window_s": 8.0,
       "outcome": "error",
@@ -442,38 +481,146 @@
       "error": "RuntimeError: no speech found in captured input; nothing to time against",
       "reply": null,
       "transcript": null,
-      "t_wall": "00:27:23",
+      "t_wall": "01:44:31",
+      "loadavg": [
+        2.81,
+        2.83,
+        2.91
+      ]
+    },
+    {
+      "system": "cascade-fast",
+      "probe": "post-reply",
+      "prompt_id": "t1a",
+      "preceding_turn": {
+        "reply": "4",
+        "gap_ms": 487.11
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8229.8,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:44:43",
+      "loadavg": [
+        3.03,
+        2.88,
+        2.93
+      ]
+    },
+    {
+      "system": "cascade-fast-tiny",
+      "probe": "post-reply",
+      "prompt_id": "t1a",
+      "preceding_turn": {
+        "reply": "4",
+        "gap_ms": 362.51
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8122.5,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:44:54",
+      "loadavg": [
+        2.72,
+        2.82,
+        2.9
+      ]
+    },
+    {
+      "system": "cascade-serial-say",
+      "probe": "post-reply",
+      "prompt_id": "t1a",
+      "preceding_turn": {
+        "reply": "4",
+        "gap_ms": 1550.42
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8229.3,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:45:06",
       "loadavg": [
         2.92,
-        4.59,
-        5.18
-      ]
-    },
-    {
-      "system": "cascade-fast",
-      "probe": "post-reply",
-      "prompt_id": "t2a",
-      "preceding_turn": {
-        "reply": "Paris.",
-        "gap_ms": 473.85
-      },
-      "window_s": 8.0,
-      "outcome": "error",
-      "time_to_outcome_ms": 8232.6,
-      "hung": false,
-      "guard_s": 12.0,
-      "agent_audio_ms": 0.0,
-      "agent_speech_onset_ms": null,
-      "output_peak_dbfs": -240.0,
-      "re_prompted": false,
-      "error": "RuntimeError: no speech found in captured input; nothing to time against",
-      "reply": null,
-      "transcript": null,
-      "t_wall": "00:27:34",
-      "loadavg": [
         2.86,
-        4.49,
-        5.14
+        2.92
+      ]
+    },
+    {
+      "system": "cascade-serial",
+      "probe": "post-reply",
+      "prompt_id": "t2a",
+      "preceding_turn": {
+        "reply": "Paris.",
+        "gap_ms": 777.23
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8237.0,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:45:18",
+      "loadavg": [
+        2.92,
+        2.86,
+        2.92
+      ]
+    },
+    {
+      "system": "cascade-fast",
+      "probe": "post-reply",
+      "prompt_id": "t2a",
+      "preceding_turn": {
+        "reply": "Paris.",
+        "gap_ms": 496.72
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8225.7,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:45:29",
+      "loadavg": [
+        3.31,
+        2.95,
+        2.95
       ]
     },
     {
@@ -482,11 +629,11 @@
       "prompt_id": "t2a",
       "preceding_turn": {
         "reply": "Paris.",
-        "gap_ms": 363.37
+        "gap_ms": 382.8
       },
       "window_s": 8.0,
       "outcome": "error",
-      "time_to_outcome_ms": 8131.6,
+      "time_to_outcome_ms": 8119.3,
       "hung": false,
       "guard_s": 12.0,
       "agent_audio_ms": 0.0,
@@ -496,11 +643,38 @@
       "error": "RuntimeError: no speech found in captured input; nothing to time against",
       "reply": null,
       "transcript": null,
-      "t_wall": "00:27:46",
+      "t_wall": "01:45:41",
       "loadavg": [
-        3.91,
-        4.66,
-        5.19
+        3.26,
+        2.95,
+        2.95
+      ]
+    },
+    {
+      "system": "cascade-serial-say",
+      "probe": "post-reply",
+      "prompt_id": "t2a",
+      "preceding_turn": {
+        "reply": "Paris.",
+        "gap_ms": 1566.77
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8224.4,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:45:53",
+      "loadavg": [
+        3.71,
+        3.07,
+        2.99
       ]
     },
     {
@@ -508,12 +682,12 @@
       "probe": "post-reply",
       "prompt_id": "t3a",
       "preceding_turn": {
-        "reply": "The yeast is doing its magic.",
-        "gap_ms": 806.6
+        "reply": "The yeast in the dough eats the sugars, causing the dough to rise.",
+        "gap_ms": 850.36
       },
       "window_s": 8.0,
       "outcome": "error",
-      "time_to_outcome_ms": 8236.9,
+      "time_to_outcome_ms": 8299.8,
       "hung": false,
       "guard_s": 12.0,
       "agent_audio_ms": 0.0,
@@ -523,11 +697,11 @@
       "error": "RuntimeError: no speech found in captured input; nothing to time against",
       "reply": null,
       "transcript": null,
-      "t_wall": "00:27:59",
+      "t_wall": "01:46:08",
       "loadavg": [
-        4.1,
-        4.66,
-        5.18
+        3.79,
+        3.11,
+        3.0
       ]
     },
     {
@@ -535,12 +709,12 @@
       "probe": "post-reply",
       "prompt_id": "t3a",
       "preceding_turn": {
-        "reply": "The yeast is doing its magic.",
-        "gap_ms": 509.75
+        "reply": "The yeast in the dough eats the sugars, causing the dough to rise.",
+        "gap_ms": 1160.98
       },
       "window_s": 8.0,
       "outcome": "error",
-      "time_to_outcome_ms": 8243.0,
+      "time_to_outcome_ms": 8236.8,
       "hung": false,
       "guard_s": 12.0,
       "agent_audio_ms": 0.0,
@@ -550,11 +724,11 @@
       "error": "RuntimeError: no speech found in captured input; nothing to time against",
       "reply": null,
       "transcript": null,
-      "t_wall": "00:28:12",
+      "t_wall": "01:46:23",
       "loadavg": [
-        4.0,
-        4.62,
-        5.16
+        3.32,
+        3.04,
+        2.98
       ]
     },
     {
@@ -562,12 +736,12 @@
       "probe": "post-reply",
       "prompt_id": "t3a",
       "preceding_turn": {
-        "reply": "Freshly baked goods always seem to have a magical aroma.",
-        "gap_ms": 441.3
+        "reply": "The yeast in the dough eats the sugars, causing the dough to rise.",
+        "gap_ms": 475.68
       },
       "window_s": 8.0,
       "outcome": "error",
-      "time_to_outcome_ms": 8130.3,
+      "time_to_outcome_ms": 8127.6,
       "hung": false,
       "guard_s": 12.0,
       "agent_audio_ms": 0.0,
@@ -577,11 +751,38 @@
       "error": "RuntimeError: no speech found in captured input; nothing to time against",
       "reply": null,
       "transcript": null,
-      "t_wall": "00:28:26",
+      "t_wall": "01:46:37",
       "loadavg": [
-        4.1,
-        4.61,
-        5.15
+        3.08,
+        3.0,
+        2.97
+      ]
+    },
+    {
+      "system": "cascade-serial-say",
+      "probe": "post-reply",
+      "prompt_id": "t3a",
+      "preceding_turn": {
+        "reply": "The yeast in the dough eats the sugars, causing the dough to rise.",
+        "gap_ms": 3046.74
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8435.2,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:46:54",
+      "loadavg": [
+        3.12,
+        3.02,
+        2.97
       ]
     },
     {
@@ -589,12 +790,12 @@
       "probe": "post-reply",
       "prompt_id": "t4a",
       "preceding_turn": {
-        "reply": "$4 each.",
-        "gap_ms": 770.23
+        "reply": "$1 each.",
+        "gap_ms": 1148.36
       },
       "window_s": 8.0,
       "outcome": "error",
-      "time_to_outcome_ms": 8248.7,
+      "time_to_outcome_ms": 8239.8,
       "hung": false,
       "guard_s": 12.0,
       "agent_audio_ms": 0.0,
@@ -604,11 +805,11 @@
       "error": "RuntimeError: no speech found in captured input; nothing to time against",
       "reply": null,
       "transcript": null,
-      "t_wall": "00:28:39",
+      "t_wall": "01:47:08",
       "loadavg": [
-        4.48,
-        4.67,
-        5.16
+        2.85,
+        2.97,
+        2.96
       ]
     },
     {
@@ -616,12 +817,12 @@
       "probe": "post-reply",
       "prompt_id": "t4a",
       "preceding_turn": {
-        "reply": "$4 each.",
-        "gap_ms": 466.49
+        "reply": "$1 each.",
+        "gap_ms": 504.52
       },
       "window_s": 8.0,
       "outcome": "error",
-      "time_to_outcome_ms": 8229.2,
+      "time_to_outcome_ms": 8223.8,
       "hung": false,
       "guard_s": 12.0,
       "agent_audio_ms": 0.0,
@@ -631,11 +832,11 @@
       "error": "RuntimeError: no speech found in captured input; nothing to time against",
       "reply": null,
       "transcript": null,
-      "t_wall": "00:28:51",
+      "t_wall": "01:47:21",
       "loadavg": [
-        4.54,
-        4.68,
-        5.16
+        2.57,
+        2.9,
+        2.93
       ]
     },
     {
@@ -643,12 +844,12 @@
       "probe": "post-reply",
       "prompt_id": "t4a",
       "preceding_turn": {
-        "reply": "$4 each.",
-        "gap_ms": 377.65
+        "reply": "$1 each.",
+        "gap_ms": 368.92
       },
       "window_s": 8.0,
       "outcome": "error",
-      "time_to_outcome_ms": 8110.9,
+      "time_to_outcome_ms": 8124.1,
       "hung": false,
       "guard_s": 12.0,
       "agent_audio_ms": 0.0,
@@ -658,830 +859,20 @@
       "error": "RuntimeError: no speech found in captured input; nothing to time against",
       "reply": null,
       "transcript": null,
-      "t_wall": "00:29:04",
+      "t_wall": "01:47:34",
       "loadavg": [
-        3.98,
-        4.55,
-        5.1
+        2.3,
+        2.83,
+        2.9
       ]
     },
     {
-      "system": "cascade-serial",
+      "system": "cascade-serial-say",
       "probe": "post-reply",
-      "prompt_id": "t5a",
+      "prompt_id": "t4a",
       "preceding_turn": {
-        "reply": "\"Find your purpose, find your peace.\"",
-        "gap_ms": 826.99
-      },
-      "window_s": 8.0,
-      "outcome": "error",
-      "time_to_outcome_ms": 8239.4,
-      "hung": false,
-      "guard_s": 12.0,
-      "agent_audio_ms": 0.0,
-      "agent_speech_onset_ms": null,
-      "output_peak_dbfs": -240.0,
-      "re_prompted": false,
-      "error": "RuntimeError: no speech found in captured input; nothing to time against",
-      "reply": null,
-      "transcript": null,
-      "t_wall": "00:29:17",
-      "loadavg": [
-        4.6,
-        4.66,
-        5.13
-      ]
-    },
-    {
-      "system": "cascade-fast",
-      "probe": "post-reply",
-      "prompt_id": "t5a",
-      "preceding_turn": {
-        "reply": "\"Find your purpose, find your peace.\"",
-        "gap_ms": 574.91
-      },
-      "window_s": 8.0,
-      "outcome": "error",
-      "time_to_outcome_ms": 8227.1,
-      "hung": false,
-      "guard_s": 12.0,
-      "agent_audio_ms": 0.0,
-      "agent_speech_onset_ms": null,
-      "output_peak_dbfs": -240.0,
-      "re_prompted": false,
-      "error": "RuntimeError: no speech found in captured input; nothing to time against",
-      "reply": null,
-      "transcript": null,
-      "t_wall": "00:29:30",
-      "loadavg": [
-        3.87,
-        4.5,
-        5.07
-      ]
-    },
-    {
-      "system": "cascade-fast-tiny",
-      "probe": "post-reply",
-      "prompt_id": "t5a",
-      "preceding_turn": {
-        "reply": "\"Find your purpose, find your peace.\"",
-        "gap_ms": 406.17
-      },
-      "window_s": 8.0,
-      "outcome": "error",
-      "time_to_outcome_ms": 8127.7,
-      "hung": false,
-      "guard_s": 12.0,
-      "agent_audio_ms": 0.0,
-      "agent_speech_onset_ms": null,
-      "output_peak_dbfs": -240.0,
-      "re_prompted": false,
-      "error": "RuntimeError: no speech found in captured input; nothing to time against",
-      "reply": null,
-      "transcript": null,
-      "t_wall": "00:29:42",
-      "loadavg": [
-        4.13,
-        4.53,
-        5.07
-      ]
-    },
-    {
-      "system": "cascade-serial",
-      "probe": "post-reply",
-      "prompt_id": "t1b",
-      "preceding_turn": {
-        "reply": "7 days.",
-        "gap_ms": 800.33
-      },
-      "window_s": 8.0,
-      "outcome": "error",
-      "time_to_outcome_ms": 8233.1,
-      "hung": false,
-      "guard_s": 12.0,
-      "agent_audio_ms": 0.0,
-      "agent_speech_onset_ms": null,
-      "output_peak_dbfs": -240.0,
-      "re_prompted": false,
-      "error": "RuntimeError: no speech found in captured input; nothing to time against",
-      "reply": null,
-      "transcript": null,
-      "t_wall": "00:29:54",
-      "loadavg": [
-        4.26,
-        4.55,
-        5.07
-      ]
-    },
-    {
-      "system": "cascade-fast",
-      "probe": "post-reply",
-      "prompt_id": "t1b",
-      "preceding_turn": {
-        "reply": "7 days.",
-        "gap_ms": 513.52
-      },
-      "window_s": 8.0,
-      "outcome": "error",
-      "time_to_outcome_ms": 8243.6,
-      "hung": false,
-      "guard_s": 12.0,
-      "agent_audio_ms": 0.0,
-      "agent_speech_onset_ms": null,
-      "output_peak_dbfs": -240.0,
-      "re_prompted": false,
-      "error": "RuntimeError: no speech found in captured input; nothing to time against",
-      "reply": null,
-      "transcript": null,
-      "t_wall": "00:30:05",
-      "loadavg": [
-        4.08,
-        4.5,
-        5.04
-      ]
-    },
-    {
-      "system": "cascade-fast-tiny",
-      "probe": "post-reply",
-      "prompt_id": "t1b",
-      "preceding_turn": {
-        "reply": "7 days.",
-        "gap_ms": 392.12
-      },
-      "window_s": 8.0,
-      "outcome": "error",
-      "time_to_outcome_ms": 8126.0,
-      "hung": false,
-      "guard_s": 12.0,
-      "agent_audio_ms": 0.0,
-      "agent_speech_onset_ms": null,
-      "output_peak_dbfs": -240.0,
-      "re_prompted": false,
-      "error": "RuntimeError: no speech found in captured input; nothing to time against",
-      "reply": null,
-      "transcript": null,
-      "t_wall": "00:30:16",
-      "loadavg": [
-        3.75,
-        4.42,
-        5.01
-      ]
-    },
-    {
-      "system": "cascade-serial",
-      "probe": "post-reply",
-      "prompt_id": "t2b",
-      "preceding_turn": {
-        "reply": "William Shakespeare wrote the play Romeo and Juliet.",
-        "gap_ms": 871.69
-      },
-      "window_s": 8.0,
-      "outcome": "error",
-      "time_to_outcome_ms": 8224.2,
-      "hung": false,
-      "guard_s": 12.0,
-      "agent_audio_ms": 0.0,
-      "agent_speech_onset_ms": null,
-      "output_peak_dbfs": -240.0,
-      "re_prompted": false,
-      "error": "RuntimeError: no speech found in captured input; nothing to time against",
-      "reply": null,
-      "transcript": null,
-      "t_wall": "00:30:31",
-      "loadavg": [
-        4.38,
-        4.53,
-        5.04
-      ]
-    },
-    {
-      "system": "cascade-fast",
-      "probe": "post-reply",
-      "prompt_id": "t2b",
-      "preceding_turn": {
-        "reply": "William Shakespeare wrote the play Romeo and Juliet.",
-        "gap_ms": 532.07
-      },
-      "window_s": 8.0,
-      "outcome": "error",
-      "time_to_outcome_ms": 8234.7,
-      "hung": false,
-      "guard_s": 12.0,
-      "agent_audio_ms": 0.0,
-      "agent_speech_onset_ms": null,
-      "output_peak_dbfs": -240.0,
-      "re_prompted": false,
-      "error": "RuntimeError: no speech found in captured input; nothing to time against",
-      "reply": null,
-      "transcript": null,
-      "t_wall": "00:30:44",
-      "loadavg": [
-        4.22,
-        4.48,
-        5.01
-      ]
-    },
-    {
-      "system": "cascade-fast-tiny",
-      "probe": "post-reply",
-      "prompt_id": "t2b",
-      "preceding_turn": {
-        "reply": "William Shakespeare wrote the play Romeo and Juliet.",
-        "gap_ms": 384.14
-      },
-      "window_s": 8.0,
-      "outcome": "error",
-      "time_to_outcome_ms": 8128.6,
-      "hung": false,
-      "guard_s": 12.0,
-      "agent_audio_ms": 0.0,
-      "agent_speech_onset_ms": null,
-      "output_peak_dbfs": -240.0,
-      "re_prompted": false,
-      "error": "RuntimeError: no speech found in captured input; nothing to time against",
-      "reply": null,
-      "transcript": null,
-      "t_wall": "00:30:58",
-      "loadavg": [
-        4.36,
-        4.5,
-        5.01
-      ]
-    },
-    {
-      "system": "cascade-serial",
-      "probe": "post-reply",
-      "prompt_id": "t3b",
-      "preceding_turn": {
-        "reply": "The moon changes shape because the Earth, moon, and sun are aligned, causing the moon to appear larger in the sky.",
-        "gap_ms": 968.73
-      },
-      "window_s": 8.0,
-      "outcome": "error",
-      "time_to_outcome_ms": 8226.3,
-      "hung": false,
-      "guard_s": 12.0,
-      "agent_audio_ms": 0.0,
-      "agent_speech_onset_ms": null,
-      "output_peak_dbfs": -240.0,
-      "re_prompted": false,
-      "error": "RuntimeError: no speech found in captured input; nothing to time against",
-      "reply": null,
-      "transcript": null,
-      "t_wall": "00:31:16",
-      "loadavg": [
-        3.73,
-        4.35,
-        4.95
-      ]
-    },
-    {
-      "system": "cascade-fast",
-      "probe": "post-reply",
-      "prompt_id": "t3b",
-      "preceding_turn": {
-        "reply": "The moon changes shape because the Earth, moon, and sun are aligned, causing the moon to appear larger in the sky.",
-        "gap_ms": 681.32
-      },
-      "window_s": 8.0,
-      "outcome": "error",
-      "time_to_outcome_ms": 8248.1,
-      "hung": false,
-      "guard_s": 12.0,
-      "agent_audio_ms": 0.0,
-      "agent_speech_onset_ms": null,
-      "output_peak_dbfs": -240.0,
-      "re_prompted": false,
-      "error": "RuntimeError: no speech found in captured input; nothing to time against",
-      "reply": null,
-      "transcript": null,
-      "t_wall": "00:31:34",
-      "loadavg": [
-        3.82,
-        4.33,
-        4.92
-      ]
-    },
-    {
-      "system": "cascade-fast-tiny",
-      "probe": "post-reply",
-      "prompt_id": "t3b",
-      "preceding_turn": {
-        "reply": "The moon changes shape because the Earth, moon, and sun are aligned, causing the moon to appear larger in the sky.",
-        "gap_ms": 591.47
-      },
-      "window_s": 8.0,
-      "outcome": "error",
-      "time_to_outcome_ms": 8131.4,
-      "hung": false,
-      "guard_s": 12.0,
-      "agent_audio_ms": 0.0,
-      "agent_speech_onset_ms": null,
-      "output_peak_dbfs": -240.0,
-      "re_prompted": false,
-      "error": "RuntimeError: no speech found in captured input; nothing to time against",
-      "reply": null,
-      "transcript": null,
-      "t_wall": "00:31:52",
-      "loadavg": [
-        3.35,
-        4.2,
-        4.87
-      ]
-    },
-    {
-      "system": "cascade-serial",
-      "probe": "post-reply",
-      "prompt_id": "t4b",
-      "preceding_turn": {
-        "reply": "Monday.",
-        "gap_ms": 760.13
-      },
-      "window_s": 8.0,
-      "outcome": "error",
-      "time_to_outcome_ms": 8241.6,
-      "hung": false,
-      "guard_s": 12.0,
-      "agent_audio_ms": 0.0,
-      "agent_speech_onset_ms": null,
-      "output_peak_dbfs": -240.0,
-      "re_prompted": false,
-      "error": "RuntimeError: no speech found in captured input; nothing to time against",
-      "reply": null,
-      "transcript": null,
-      "t_wall": "00:32:04",
-      "loadavg": [
-        3.69,
-        4.22,
-        4.86
-      ]
-    },
-    {
-      "system": "cascade-fast",
-      "probe": "post-reply",
-      "prompt_id": "t4b",
-      "preceding_turn": {
-        "reply": "Monday.",
-        "gap_ms": 477.99
-      },
-      "window_s": 8.0,
-      "outcome": "error",
-      "time_to_outcome_ms": 8231.5,
-      "hung": false,
-      "guard_s": 12.0,
-      "agent_audio_ms": 0.0,
-      "agent_speech_onset_ms": null,
-      "output_peak_dbfs": -240.0,
-      "re_prompted": false,
-      "error": "RuntimeError: no speech found in captured input; nothing to time against",
-      "reply": null,
-      "transcript": null,
-      "t_wall": "00:32:16",
-      "loadavg": [
-        3.5,
-        4.17,
-        4.83
-      ]
-    },
-    {
-      "system": "cascade-fast-tiny",
-      "probe": "post-reply",
-      "prompt_id": "t4b",
-      "preceding_turn": {
-        "reply": "Monday.",
-        "gap_ms": 367.07
-      },
-      "window_s": 8.0,
-      "outcome": "error",
-      "time_to_outcome_ms": 8108.6,
-      "hung": false,
-      "guard_s": 12.0,
-      "agent_audio_ms": 0.0,
-      "agent_speech_onset_ms": null,
-      "output_peak_dbfs": -240.0,
-      "re_prompted": false,
-      "error": "RuntimeError: no speech found in captured input; nothing to time against",
-      "reply": null,
-      "transcript": null,
-      "t_wall": "00:32:28",
-      "loadavg": [
-        3.63,
-        4.18,
-        4.83
-      ]
-    },
-    {
-      "system": "cascade-serial",
-      "probe": "post-reply",
-      "prompt_id": "t5b",
-      "preceding_turn": {
-        "reply": "No, it's never right to lie to someone.",
-        "gap_ms": 792.41
-      },
-      "window_s": 8.0,
-      "outcome": "error",
-      "time_to_outcome_ms": 8225.8,
-      "hung": false,
-      "guard_s": 12.0,
-      "agent_audio_ms": 0.0,
-      "agent_speech_onset_ms": null,
-      "output_peak_dbfs": -240.0,
-      "re_prompted": false,
-      "error": "RuntimeError: no speech found in captured input; nothing to time against",
-      "reply": null,
-      "transcript": null,
-      "t_wall": "00:32:41",
-      "loadavg": [
-        5.44,
-        4.54,
-        4.95
-      ]
-    },
-    {
-      "system": "cascade-fast",
-      "probe": "post-reply",
-      "prompt_id": "t5b",
-      "preceding_turn": {
-        "reply": "No, it's never right to lie to someone.",
-        "gap_ms": 512.8
-      },
-      "window_s": 8.0,
-      "outcome": "error",
-      "time_to_outcome_ms": 8227.2,
-      "hung": false,
-      "guard_s": 12.0,
-      "agent_audio_ms": 0.0,
-      "agent_speech_onset_ms": null,
-      "output_peak_dbfs": -240.0,
-      "re_prompted": false,
-      "error": "RuntimeError: no speech found in captured input; nothing to time against",
-      "reply": null,
-      "transcript": null,
-      "t_wall": "00:32:53",
-      "loadavg": [
-        5.21,
-        4.52,
-        4.94
-      ]
-    },
-    {
-      "system": "cascade-fast-tiny",
-      "probe": "post-reply",
-      "prompt_id": "t5b",
-      "preceding_turn": {
-        "reply": "No, it's never right to light someone's cigarette or cigar.",
-        "gap_ms": 451.45
-      },
-      "window_s": 8.0,
-      "outcome": "error",
-      "time_to_outcome_ms": 8126.8,
-      "hung": false,
-      "guard_s": 12.0,
-      "agent_audio_ms": 0.0,
-      "agent_speech_onset_ms": null,
-      "output_peak_dbfs": -240.0,
-      "re_prompted": false,
-      "error": "RuntimeError: no speech found in captured input; nothing to time against",
-      "reply": null,
-      "transcript": null,
-      "t_wall": "00:33:07",
-      "loadavg": [
-        4.7,
-        4.45,
-        4.9
-      ]
-    },
-    {
-      "system": "cascade-serial",
-      "probe": "post-reply",
-      "prompt_id": "t1c",
-      "preceding_turn": {
-        "reply": "White.",
-        "gap_ms": 740.75
-      },
-      "window_s": 8.0,
-      "outcome": "error",
-      "time_to_outcome_ms": 8237.5,
-      "hung": false,
-      "guard_s": 12.0,
-      "agent_audio_ms": 0.0,
-      "agent_speech_onset_ms": null,
-      "output_peak_dbfs": -240.0,
-      "re_prompted": false,
-      "error": "RuntimeError: no speech found in captured input; nothing to time against",
-      "reply": null,
-      "transcript": null,
-      "t_wall": "00:33:19",
-      "loadavg": [
-        4.21,
-        4.35,
-        4.86
-      ]
-    },
-    {
-      "system": "cascade-fast",
-      "probe": "post-reply",
-      "prompt_id": "t1c",
-      "preceding_turn": {
-        "reply": "White.",
-        "gap_ms": 459.89
-      },
-      "window_s": 8.0,
-      "outcome": "error",
-      "time_to_outcome_ms": 8240.7,
-      "hung": false,
-      "guard_s": 12.0,
-      "agent_audio_ms": 0.0,
-      "agent_speech_onset_ms": null,
-      "output_peak_dbfs": -240.0,
-      "re_prompted": false,
-      "error": "RuntimeError: no speech found in captured input; nothing to time against",
-      "reply": null,
-      "transcript": null,
-      "t_wall": "00:33:30",
-      "loadavg": [
-        3.72,
-        4.23,
-        4.81
-      ]
-    },
-    {
-      "system": "cascade-fast-tiny",
-      "probe": "post-reply",
-      "prompt_id": "t1c",
-      "preceding_turn": {
-        "reply": "White.",
-        "gap_ms": 357.35
-      },
-      "window_s": 8.0,
-      "outcome": "error",
-      "time_to_outcome_ms": 8133.5,
-      "hung": false,
-      "guard_s": 12.0,
-      "agent_audio_ms": 0.0,
-      "agent_speech_onset_ms": null,
-      "output_peak_dbfs": -240.0,
-      "re_prompted": false,
-      "error": "RuntimeError: no speech found in captured input; nothing to time against",
-      "reply": null,
-      "transcript": null,
-      "t_wall": "00:33:41",
-      "loadavg": [
-        3.85,
-        4.24,
-        4.81
-      ]
-    },
-    {
-      "system": "cascade-serial",
-      "probe": "post-reply",
-      "prompt_id": "t2c",
-      "preceding_turn": {
-        "reply": "The Pacific Ocean is the largest ocean on Earth.",
-        "gap_ms": 805.63
-      },
-      "window_s": 8.0,
-      "outcome": "error",
-      "time_to_outcome_ms": 8228.9,
-      "hung": false,
-      "guard_s": 12.0,
-      "agent_audio_ms": 0.0,
-      "agent_speech_onset_ms": null,
-      "output_peak_dbfs": -240.0,
-      "re_prompted": false,
-      "error": "RuntimeError: no speech found in captured input; nothing to time against",
-      "reply": null,
-      "transcript": null,
-      "t_wall": "00:33:54",
-      "loadavg": [
-        4.42,
-        4.35,
-        4.83
-      ]
-    },
-    {
-      "system": "cascade-fast",
-      "probe": "post-reply",
-      "prompt_id": "t2c",
-      "preceding_turn": {
-        "reply": "The Pacific Ocean is the largest ocean on Earth.",
-        "gap_ms": 561.86
-      },
-      "window_s": 8.0,
-      "outcome": "error",
-      "time_to_outcome_ms": 8240.7,
-      "hung": false,
-      "guard_s": 12.0,
-      "agent_audio_ms": 0.0,
-      "agent_speech_onset_ms": null,
-      "output_peak_dbfs": -240.0,
-      "re_prompted": false,
-      "error": "RuntimeError: no speech found in captured input; nothing to time against",
-      "reply": null,
-      "transcript": null,
-      "t_wall": "00:34:08",
-      "loadavg": [
-        3.97,
-        4.25,
-        4.79
-      ]
-    },
-    {
-      "system": "cascade-fast-tiny",
-      "probe": "post-reply",
-      "prompt_id": "t2c",
-      "preceding_turn": {
-        "reply": "The Pacific Ocean is the largest ocean on Earth.",
-        "gap_ms": 450.24
-      },
-      "window_s": 8.0,
-      "outcome": "error",
-      "time_to_outcome_ms": 8125.3,
-      "hung": false,
-      "guard_s": 12.0,
-      "agent_audio_ms": 0.0,
-      "agent_speech_onset_ms": null,
-      "output_peak_dbfs": -240.0,
-      "re_prompted": false,
-      "error": "RuntimeError: no speech found in captured input; nothing to time against",
-      "reply": null,
-      "transcript": null,
-      "t_wall": "00:34:21",
-      "loadavg": [
-        3.67,
-        4.17,
-        4.76
-      ]
-    },
-    {
-      "system": "cascade-serial",
-      "probe": "post-reply",
-      "prompt_id": "t3c",
-      "preceding_turn": {
-        "reply": "It uses a combination of insulation, refrigerant, and temperature control.",
-        "gap_ms": 868.01
-      },
-      "window_s": 8.0,
-      "outcome": "error",
-      "time_to_outcome_ms": 8246.7,
-      "hung": false,
-      "guard_s": 12.0,
-      "agent_audio_ms": 0.0,
-      "agent_speech_onset_ms": null,
-      "output_peak_dbfs": -240.0,
-      "re_prompted": false,
-      "error": "RuntimeError: no speech found in captured input; nothing to time against",
-      "reply": null,
-      "transcript": null,
-      "t_wall": "00:34:37",
-      "loadavg": [
-        4.6,
-        4.36,
-        4.81
-      ]
-    },
-    {
-      "system": "cascade-fast",
-      "probe": "post-reply",
-      "prompt_id": "t3c",
-      "preceding_turn": {
-        "reply": "It uses a combination of insulation, refrigerant, and temperature control.",
-        "gap_ms": 573.73
-      },
-      "window_s": 8.0,
-      "outcome": "error",
-      "time_to_outcome_ms": 8247.5,
-      "hung": false,
-      "guard_s": 12.0,
-      "agent_audio_ms": 0.0,
-      "agent_speech_onset_ms": null,
-      "output_peak_dbfs": -240.0,
-      "re_prompted": false,
-      "error": "RuntimeError: no speech found in captured input; nothing to time against",
-      "reply": null,
-      "transcript": null,
-      "t_wall": "00:34:53",
-      "loadavg": [
-        4.51,
-        4.34,
-        4.8
-      ]
-    },
-    {
-      "system": "cascade-fast-tiny",
-      "probe": "post-reply",
-      "prompt_id": "t3c",
-      "preceding_turn": {
-        "reply": "It uses a combination of insulation, refrigerant, and temperature control.",
-        "gap_ms": 454.03
-      },
-      "window_s": 8.0,
-      "outcome": "error",
-      "time_to_outcome_ms": 8131.0,
-      "hung": false,
-      "guard_s": 12.0,
-      "agent_audio_ms": 0.0,
-      "agent_speech_onset_ms": null,
-      "output_peak_dbfs": -240.0,
-      "re_prompted": false,
-      "error": "RuntimeError: no speech found in captured input; nothing to time against",
-      "reply": null,
-      "transcript": null,
-      "t_wall": "00:35:09",
-      "loadavg": [
-        4.6,
-        4.37,
-        4.8
-      ]
-    },
-    {
-      "system": "cascade-serial",
-      "probe": "post-reply",
-      "prompt_id": "t4c",
-      "preceding_turn": {
-        "reply": "$40 - $20 = $20",
-        "gap_ms": 813.29
-      },
-      "window_s": 8.0,
-      "outcome": "error",
-      "time_to_outcome_ms": 8231.5,
-      "hung": false,
-      "guard_s": 12.0,
-      "agent_audio_ms": 0.0,
-      "agent_speech_onset_ms": null,
-      "output_peak_dbfs": -240.0,
-      "re_prompted": false,
-      "error": "RuntimeError: no speech found in captured input; nothing to time against",
-      "reply": null,
-      "transcript": null,
-      "t_wall": "00:35:23",
-      "loadavg": [
-        4.19,
-        4.29,
-        4.76
-      ]
-    },
-    {
-      "system": "cascade-fast",
-      "probe": "post-reply",
-      "prompt_id": "t4c",
-      "preceding_turn": {
-        "reply": "$40 - $20 = $20",
-        "gap_ms": 522.89
-      },
-      "window_s": 8.0,
-      "outcome": "error",
-      "time_to_outcome_ms": 8241.3,
-      "hung": false,
-      "guard_s": 12.0,
-      "agent_audio_ms": 0.0,
-      "agent_speech_onset_ms": null,
-      "output_peak_dbfs": -240.0,
-      "re_prompted": false,
-      "error": "RuntimeError: no speech found in captured input; nothing to time against",
-      "reply": null,
-      "transcript": null,
-      "t_wall": "00:35:36",
-      "loadavg": [
-        3.69,
-        4.18,
-        4.71
-      ]
-    },
-    {
-      "system": "cascade-fast-tiny",
-      "probe": "post-reply",
-      "prompt_id": "t4c",
-      "preceding_turn": {
-        "reply": "$40 is worth $20.",
-        "gap_ms": 368.25
-      },
-      "window_s": 8.0,
-      "outcome": "error",
-      "time_to_outcome_ms": 8129.3,
-      "hung": false,
-      "guard_s": 12.0,
-      "agent_audio_ms": 0.0,
-      "agent_speech_onset_ms": null,
-      "output_peak_dbfs": -240.0,
-      "re_prompted": false,
-      "error": "RuntimeError: no speech found in captured input; nothing to time against",
-      "reply": null,
-      "transcript": null,
-      "t_wall": "00:35:49",
-      "loadavg": [
-        4.07,
-        4.23,
-        4.72
-      ]
-    },
-    {
-      "system": "cascade-serial",
-      "probe": "post-reply",
-      "prompt_id": "t5c",
-      "preceding_turn": {
-        "reply": "Belonging to a good family, having loving relationships, and experiencing personal growth.",
-        "gap_ms": 887.68
+        "reply": "$1 each.",
+        "gap_ms": 1879.59
       },
       "window_s": 8.0,
       "outcome": "error",
@@ -1495,24 +886,24 @@
       "error": "RuntimeError: no speech found in captured input; nothing to time against",
       "reply": null,
       "transcript": null,
-      "t_wall": "00:36:06",
+      "t_wall": "01:47:48",
       "loadavg": [
-        3.46,
-        4.09,
-        4.66
+        2.71,
+        2.9,
+        2.93
       ]
     },
     {
-      "system": "cascade-fast",
+      "system": "cascade-serial",
       "probe": "post-reply",
-      "prompt_id": "t5c",
+      "prompt_id": "t5a",
       "preceding_turn": {
-        "reply": "Belonging to a good family, having loving relationships, and experiencing personal growth.",
-        "gap_ms": 621.04
+        "reply": "\"Find your purpose, find your peace.\"",
+        "gap_ms": 819.62
       },
       "window_s": 8.0,
       "outcome": "error",
-      "time_to_outcome_ms": 8236.2,
+      "time_to_outcome_ms": 8235.1,
       "hung": false,
       "guard_s": 12.0,
       "agent_audio_ms": 0.0,
@@ -1522,51 +913,429 @@
       "error": "RuntimeError: no speech found in captured input; nothing to time against",
       "reply": null,
       "transcript": null,
-      "t_wall": "00:36:22",
+      "t_wall": "01:48:01",
       "loadavg": [
-        3.98,
+        2.44,
+        2.83,
+        2.91
+      ]
+    },
+    {
+      "system": "cascade-fast",
+      "probe": "post-reply",
+      "prompt_id": "t5a",
+      "preceding_turn": {
+        "reply": "\"Find your purpose, find your peace.\"",
+        "gap_ms": 544.42
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8226.4,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:48:14",
+      "loadavg": [
+        2.12,
+        2.74,
+        2.87
+      ]
+    },
+    {
+      "system": "cascade-fast-tiny",
+      "probe": "post-reply",
+      "prompt_id": "t5a",
+      "preceding_turn": {
+        "reply": "\"Find your purpose, find your peace.\"",
+        "gap_ms": 420.84
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8121.8,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:48:26",
+      "loadavg": [
+        2.35,
+        2.77,
+        2.88
+      ]
+    },
+    {
+      "system": "cascade-serial-say",
+      "probe": "post-reply",
+      "prompt_id": "t5a",
+      "preceding_turn": {
+        "reply": "\"Find your purpose, find your peace.\"",
+        "gap_ms": 2233.78
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8237.9,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:48:41",
+      "loadavg": [
+        2.12,
+        2.7,
+        2.85
+      ]
+    },
+    {
+      "system": "cascade-serial",
+      "probe": "post-reply",
+      "prompt_id": "t1b",
+      "preceding_turn": {
+        "reply": "7 days.",
+        "gap_ms": 770.39
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8249.5,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:48:53",
+      "loadavg": [
+        1.94,
+        2.63,
+        2.82
+      ]
+    },
+    {
+      "system": "cascade-fast",
+      "probe": "post-reply",
+      "prompt_id": "t1b",
+      "preceding_turn": {
+        "reply": "7 days.",
+        "gap_ms": 659.58
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8232.6,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:49:04",
+      "loadavg": [
+        1.8,
+        2.57,
+        2.8
+      ]
+    },
+    {
+      "system": "cascade-fast-tiny",
+      "probe": "post-reply",
+      "prompt_id": "t1b",
+      "preceding_turn": {
+        "reply": "7 days.",
+        "gap_ms": 586.37
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8117.5,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:49:16",
+      "loadavg": [
+        1.92,
+        2.57,
+        2.8
+      ]
+    },
+    {
+      "system": "cascade-serial-say",
+      "probe": "post-reply",
+      "prompt_id": "t1b",
+      "preceding_turn": {
+        "reply": "7 days.",
+        "gap_ms": 1576.16
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8239.5,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:49:29",
+      "loadavg": [
+        2.78,
+        2.72,
+        2.85
+      ]
+    },
+    {
+      "system": "cascade-serial",
+      "probe": "post-reply",
+      "prompt_id": "t2b",
+      "preceding_turn": {
+        "reply": "William Shakespeare wrote the play Romeo and Juliet.",
+        "gap_ms": 844.29
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8228.3,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:49:43",
+      "loadavg": [
+        3.14,
+        2.8,
+        2.87
+      ]
+    },
+    {
+      "system": "cascade-fast",
+      "probe": "post-reply",
+      "prompt_id": "t2b",
+      "preceding_turn": {
+        "reply": "William Shakespeare wrote the play Romeo and Juliet.",
+        "gap_ms": 758.64
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8223.7,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:49:56",
+      "loadavg": [
+        2.96,
+        2.78,
+        2.86
+      ]
+    },
+    {
+      "system": "cascade-fast-tiny",
+      "probe": "post-reply",
+      "prompt_id": "t2b",
+      "preceding_turn": {
+        "reply": "William Shakespeare wrote the play Romeo and Juliet.",
+        "gap_ms": 419.02
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8107.9,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:50:10",
+      "loadavg": [
+        3.05,
+        2.8,
+        2.87
+      ]
+    },
+    {
+      "system": "cascade-serial-say",
+      "probe": "post-reply",
+      "prompt_id": "t2b",
+      "preceding_turn": {
+        "reply": "William Shakespeare wrote the play Romeo and Juliet.",
+        "gap_ms": 2009.42
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8228.7,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:50:25",
+      "loadavg": [
+        3.74,
+        2.97,
+        2.93
+      ]
+    },
+    {
+      "system": "cascade-serial",
+      "probe": "post-reply",
+      "prompt_id": "t3b",
+      "preceding_turn": {
+        "reply": "I don't have any information about the moon changing sheep.",
+        "gap_ms": 830.39
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8221.1,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:50:40",
+      "loadavg": [
+        3.42,
+        2.94,
+        2.92
+      ]
+    },
+    {
+      "system": "cascade-fast",
+      "probe": "post-reply",
+      "prompt_id": "t3b",
+      "preceding_turn": {
+        "reply": "I don't have any information about the moon changing sheep.",
+        "gap_ms": 562.11
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8230.5,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:50:53",
+      "loadavg": [
+        3.17,
+        2.91,
+        2.91
+      ]
+    },
+    {
+      "system": "cascade-fast-tiny",
+      "probe": "post-reply",
+      "prompt_id": "t3b",
+      "preceding_turn": {
+        "reply": "The moon changes shape because the Earth, moon, and sun are aligned, causing the moon to appear larger in the sky.",
+        "gap_ms": 545.19
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8107.0,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:51:11",
+      "loadavg": [
+        3.87,
+        3.06,
+        2.96
+      ]
+    },
+    {
+      "system": "cascade-serial-say",
+      "probe": "post-reply",
+      "prompt_id": "t3b",
+      "preceding_turn": {
+        "reply": "I don't have any information about the moon changing sheep.",
+        "gap_ms": 1805.32
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8234.8,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:51:26",
+      "loadavg": [
         4.17,
-        4.68
-      ]
-    },
-    {
-      "system": "cascade-fast-tiny",
-      "probe": "post-reply",
-      "prompt_id": "t5c",
-      "preceding_turn": {
-        "reply": "Belonging to a good family, having loving relationships, and experiencing personal growth.",
-        "gap_ms": 467.33
-      },
-      "window_s": 8.0,
-      "outcome": "error",
-      "time_to_outcome_ms": 8120.5,
-      "hung": false,
-      "guard_s": 12.0,
-      "agent_audio_ms": 0.0,
-      "agent_speech_onset_ms": null,
-      "output_peak_dbfs": -240.0,
-      "re_prompted": false,
-      "error": "RuntimeError: no speech found in captured input; nothing to time against",
-      "reply": null,
-      "transcript": null,
-      "t_wall": "00:36:38",
-      "loadavg": [
-        4.1,
-        4.19,
-        4.68
+        3.17,
+        3.0
       ]
     },
     {
       "system": "cascade-serial",
       "probe": "post-reply",
-      "prompt_id": "t1d",
+      "prompt_id": "t4b",
       "preceding_turn": {
-        "reply": "Four.",
-        "gap_ms": 744.51
+        "reply": "Monday.",
+        "gap_ms": 751.04
       },
       "window_s": 8.0,
       "outcome": "error",
-      "time_to_outcome_ms": 8251.3,
+      "time_to_outcome_ms": 8223.0,
       "hung": false,
       "guard_s": 12.0,
       "agent_audio_ms": 0.0,
@@ -1576,24 +1345,24 @@
       "error": "RuntimeError: no speech found in captured input; nothing to time against",
       "reply": null,
       "transcript": null,
-      "t_wall": "00:36:51",
+      "t_wall": "01:51:38",
       "loadavg": [
-        4.69,
-        4.33,
-        4.72
+        3.83,
+        3.15,
+        2.99
       ]
     },
     {
       "system": "cascade-fast",
       "probe": "post-reply",
-      "prompt_id": "t1d",
+      "prompt_id": "t4b",
       "preceding_turn": {
-        "reply": "Four.",
-        "gap_ms": 479.06
+        "reply": "Monday.",
+        "gap_ms": 460.14
       },
       "window_s": 8.0,
       "outcome": "error",
-      "time_to_outcome_ms": 8243.5,
+      "time_to_outcome_ms": 8218.6,
       "hung": false,
       "guard_s": 12.0,
       "agent_audio_ms": 0.0,
@@ -1603,24 +1372,24 @@
       "error": "RuntimeError: no speech found in captured input; nothing to time against",
       "reply": null,
       "transcript": null,
-      "t_wall": "00:37:02",
+      "t_wall": "01:51:50",
       "loadavg": [
-        5.03,
-        4.41,
-        4.74
+        3.63,
+        3.13,
+        2.99
       ]
     },
     {
       "system": "cascade-fast-tiny",
       "probe": "post-reply",
-      "prompt_id": "t1d",
+      "prompt_id": "t4b",
       "preceding_turn": {
-        "reply": "Four.",
-        "gap_ms": 360.46
+        "reply": "Monday.",
+        "gap_ms": 359.07
       },
       "window_s": 8.0,
       "outcome": "error",
-      "time_to_outcome_ms": 8129.4,
+      "time_to_outcome_ms": 8103.8,
       "hung": false,
       "guard_s": 12.0,
       "agent_audio_ms": 0.0,
@@ -1630,24 +1399,51 @@
       "error": "RuntimeError: no speech found in captured input; nothing to time against",
       "reply": null,
       "transcript": null,
-      "t_wall": "00:37:14",
+      "t_wall": "01:52:02",
       "loadavg": [
-        5.03,
-        4.43,
-        4.75
+        3.38,
+        3.09,
+        2.98
+      ]
+    },
+    {
+      "system": "cascade-serial-say",
+      "probe": "post-reply",
+      "prompt_id": "t4b",
+      "preceding_turn": {
+        "reply": "Monday.",
+        "gap_ms": 1548.08
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8221.9,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:52:15",
+      "loadavg": [
+        3.36,
+        3.1,
+        2.98
       ]
     },
     {
       "system": "cascade-serial",
       "probe": "post-reply",
-      "prompt_id": "t2d",
+      "prompt_id": "t5b",
       "preceding_turn": {
-        "reply": "April 15, 1912.",
-        "gap_ms": 775.39
+        "reply": "No, it's never right to lie to someone.",
+        "gap_ms": 804.48
       },
       "window_s": 8.0,
       "outcome": "error",
-      "time_to_outcome_ms": 8242.2,
+      "time_to_outcome_ms": 8222.1,
       "hung": false,
       "guard_s": 12.0,
       "agent_audio_ms": 0.0,
@@ -1657,24 +1453,24 @@
       "error": "RuntimeError: no speech found in captured input; nothing to time against",
       "reply": null,
       "transcript": null,
-      "t_wall": "00:37:28",
+      "t_wall": "01:52:28",
       "loadavg": [
-        4.82,
-        4.41,
-        4.73
+        3.47,
+        3.14,
+        3.0
       ]
     },
     {
       "system": "cascade-fast",
       "probe": "post-reply",
-      "prompt_id": "t2d",
+      "prompt_id": "t5b",
       "preceding_turn": {
-        "reply": "April 15, 1912.",
-        "gap_ms": 556.99
+        "reply": "No, it's never right to lie to someone.",
+        "gap_ms": 492.42
       },
       "window_s": 8.0,
       "outcome": "error",
-      "time_to_outcome_ms": 8239.3,
+      "time_to_outcome_ms": 8229.0,
       "hung": false,
       "guard_s": 12.0,
       "agent_audio_ms": 0.0,
@@ -1684,24 +1480,24 @@
       "error": "RuntimeError: no speech found in captured input; nothing to time against",
       "reply": null,
       "transcript": null,
-      "t_wall": "00:37:42",
+      "t_wall": "01:52:41",
       "loadavg": [
-        4.53,
-        4.37,
-        4.71
+        3.89,
+        3.24,
+        3.03
       ]
     },
     {
       "system": "cascade-fast-tiny",
       "probe": "post-reply",
-      "prompt_id": "t2d",
+      "prompt_id": "t5b",
       "preceding_turn": {
-        "reply": "April 15, 1912.",
-        "gap_ms": 397.5
+        "reply": "No, it's never right to light someone's cigarette or cigar.",
+        "gap_ms": 403.37
       },
       "window_s": 8.0,
       "outcome": "error",
-      "time_to_outcome_ms": 8128.7,
+      "time_to_outcome_ms": 8105.3,
       "hung": false,
       "guard_s": 12.0,
       "agent_audio_ms": 0.0,
@@ -1711,119 +1507,929 @@
       "error": "RuntimeError: no speech found in captured input; nothing to time against",
       "reply": null,
       "transcript": null,
-      "t_wall": "00:37:55",
-      "loadavg": [
-        5.74,
-        4.63,
-        4.8
-      ]
-    },
-    {
-      "system": "cascade-serial",
-      "probe": "post-reply",
-      "prompt_id": "t3d",
-      "preceding_turn": {
-        "reply": "Road salt and ice melters can lower the freezing point of water, but they don't actually \"melt\" ice.",
-        "gap_ms": 916.36
-      },
-      "window_s": 8.0,
-      "outcome": "error",
-      "time_to_outcome_ms": 8247.0,
-      "hung": false,
-      "guard_s": 12.0,
-      "agent_audio_ms": 0.0,
-      "agent_speech_onset_ms": null,
-      "output_peak_dbfs": -240.0,
-      "re_prompted": false,
-      "error": "RuntimeError: no speech found in captured input; nothing to time against",
-      "reply": null,
-      "transcript": null,
-      "t_wall": "00:38:13",
-      "loadavg": [
-        5.43,
-        4.62,
-        4.79
-      ]
-    },
-    {
-      "system": "cascade-fast",
-      "probe": "post-reply",
-      "prompt_id": "t3d",
-      "preceding_turn": {
-        "reply": "Road salt and ice melters can lower the freezing point of water, but they don't actually \"melt\" ice.",
-        "gap_ms": 670.29
-      },
-      "window_s": 8.0,
-      "outcome": "error",
-      "time_to_outcome_ms": 8247.7,
-      "hung": false,
-      "guard_s": 12.0,
-      "agent_audio_ms": 0.0,
-      "agent_speech_onset_ms": null,
-      "output_peak_dbfs": -240.0,
-      "re_prompted": false,
-      "error": "RuntimeError: no speech found in captured input; nothing to time against",
-      "reply": null,
-      "transcript": null,
-      "t_wall": "00:38:29",
-      "loadavg": [
-        4.25,
-        4.4,
-        4.71
-      ]
-    },
-    {
-      "system": "cascade-fast-tiny",
-      "probe": "post-reply",
-      "prompt_id": "t3d",
-      "preceding_turn": {
-        "reply": "Road salt can lower the freezing point of water, causing ice to melt earlier.",
-        "gap_ms": 488.07
-      },
-      "window_s": 8.0,
-      "outcome": "error",
-      "time_to_outcome_ms": 8141.8,
-      "hung": false,
-      "guard_s": 12.0,
-      "agent_audio_ms": 0.0,
-      "agent_speech_onset_ms": null,
-      "output_peak_dbfs": -240.0,
-      "re_prompted": false,
-      "error": "RuntimeError: no speech found in captured input; nothing to time against",
-      "reply": null,
-      "transcript": null,
-      "t_wall": "00:38:45",
-      "loadavg": [
-        4.07,
-        4.36,
-        4.69
-      ]
-    },
-    {
-      "system": "cascade-serial",
-      "probe": "post-reply",
-      "prompt_id": "t4d",
-      "preceding_turn": {
-        "reply": "4.",
-        "gap_ms": 846.12
-      },
-      "window_s": 8.0,
-      "outcome": "error",
-      "time_to_outcome_ms": 8246.8,
-      "hung": false,
-      "guard_s": 12.0,
-      "agent_audio_ms": 0.0,
-      "agent_speech_onset_ms": null,
-      "output_peak_dbfs": -240.0,
-      "re_prompted": false,
-      "error": "RuntimeError: no speech found in captured input; nothing to time against",
-      "reply": null,
-      "transcript": null,
-      "t_wall": "00:38:57",
+      "t_wall": "01:52:54",
       "loadavg": [
         3.68,
-        4.27,
-        4.65
+        3.22,
+        3.03
+      ]
+    },
+    {
+      "system": "cascade-serial-say",
+      "probe": "post-reply",
+      "prompt_id": "t5b",
+      "preceding_turn": {
+        "reply": "No, it's never right to lie to someone.",
+        "gap_ms": 1739.96
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8227.1,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:53:09",
+      "loadavg": [
+        3.76,
+        3.26,
+        3.05
+      ]
+    },
+    {
+      "system": "cascade-serial",
+      "probe": "post-reply",
+      "prompt_id": "t1c",
+      "preceding_turn": {
+        "reply": "White.",
+        "gap_ms": 757.9
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8226.1,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:53:20",
+      "loadavg": [
+        3.64,
+        3.25,
+        3.05
+      ]
+    },
+    {
+      "system": "cascade-fast",
+      "probe": "post-reply",
+      "prompt_id": "t1c",
+      "preceding_turn": {
+        "reply": "White.",
+        "gap_ms": 467.1
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8221.7,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:53:31",
+      "loadavg": [
+        4.0,
+        3.34,
+        3.08
+      ]
+    },
+    {
+      "system": "cascade-fast-tiny",
+      "probe": "post-reply",
+      "prompt_id": "t1c",
+      "preceding_turn": {
+        "reply": "White.",
+        "gap_ms": 370.66
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8107.0,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:53:42",
+      "loadavg": [
+        3.77,
+        3.31,
+        3.08
+      ]
+    },
+    {
+      "system": "cascade-serial-say",
+      "probe": "post-reply",
+      "prompt_id": "t1c",
+      "preceding_turn": {
+        "reply": "White.",
+        "gap_ms": 1534.37
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8227.6,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:53:55",
+      "loadavg": [
+        3.53,
+        3.28,
+        3.07
+      ]
+    },
+    {
+      "system": "cascade-serial",
+      "probe": "post-reply",
+      "prompt_id": "t2c",
+      "preceding_turn": {
+        "reply": "The Pacific Ocean is the largest ocean on Earth.",
+        "gap_ms": 819.23
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8228.6,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:54:08",
+      "loadavg": [
+        3.35,
+        3.25,
+        3.06
+      ]
+    },
+    {
+      "system": "cascade-fast",
+      "probe": "post-reply",
+      "prompt_id": "t2c",
+      "preceding_turn": {
+        "reply": "The Pacific Ocean is the largest ocean on Earth.",
+        "gap_ms": 560.56
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8223.5,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:54:21",
+      "loadavg": [
+        3.44,
+        3.28,
+        3.07
+      ]
+    },
+    {
+      "system": "cascade-fast-tiny",
+      "probe": "post-reply",
+      "prompt_id": "t2c",
+      "preceding_turn": {
+        "reply": "The Pacific Ocean is the largest ocean on Earth.",
+        "gap_ms": 434.11
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8110.4,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:54:34",
+      "loadavg": [
+        3.97,
+        3.39,
+        3.12
+      ]
+    },
+    {
+      "system": "cascade-serial-say",
+      "probe": "post-reply",
+      "prompt_id": "t2c",
+      "preceding_turn": {
+        "reply": "The Pacific Ocean is the largest ocean on Earth.",
+        "gap_ms": 1788.51
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8227.1,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:54:49",
+      "loadavg": [
+        3.67,
+        3.36,
+        3.11
+      ]
+    },
+    {
+      "system": "cascade-serial",
+      "probe": "post-reply",
+      "prompt_id": "t3c",
+      "preceding_turn": {
+        "reply": "It uses a combination of insulation, refrigerant, and temperature control.",
+        "gap_ms": 848.55
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8224.0,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:55:05",
+      "loadavg": [
+        3.64,
+        3.37,
+        3.12
+      ]
+    },
+    {
+      "system": "cascade-fast",
+      "probe": "post-reply",
+      "prompt_id": "t3c",
+      "preceding_turn": {
+        "reply": "It uses a combination of insulation, refrigerant, and temperature control.",
+        "gap_ms": 613.26
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8220.5,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:55:20",
+      "loadavg": [
+        3.62,
+        3.38,
+        3.12
+      ]
+    },
+    {
+      "system": "cascade-fast-tiny",
+      "probe": "post-reply",
+      "prompt_id": "t3c",
+      "preceding_turn": {
+        "reply": "It uses a combination of insulation, refrigerant, and temperature control.",
+        "gap_ms": 461.6
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8111.6,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:55:36",
+      "loadavg": [
+        3.67,
+        3.41,
+        3.14
+      ]
+    },
+    {
+      "system": "cascade-serial-say",
+      "probe": "post-reply",
+      "prompt_id": "t3c",
+      "preceding_turn": {
+        "reply": "It uses a combination of insulation, refrigerant, and temperature control.",
+        "gap_ms": 1977.02
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8225.0,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:55:53",
+      "loadavg": [
+        3.65,
+        3.43,
+        3.15
+      ]
+    },
+    {
+      "system": "cascade-serial",
+      "probe": "post-reply",
+      "prompt_id": "t4c",
+      "preceding_turn": {
+        "reply": "$40 - $20 = $20",
+        "gap_ms": 872.51
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8228.1,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:56:07",
+      "loadavg": [
+        3.55,
+        3.42,
+        3.15
+      ]
+    },
+    {
+      "system": "cascade-fast",
+      "probe": "post-reply",
+      "prompt_id": "t4c",
+      "preceding_turn": {
+        "reply": "$40 - $20 = $20",
+        "gap_ms": 542.29
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8224.7,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:56:20",
+      "loadavg": [
+        4.19,
+        3.57,
+        3.21
+      ]
+    },
+    {
+      "system": "cascade-fast-tiny",
+      "probe": "post-reply",
+      "prompt_id": "t4c",
+      "preceding_turn": {
+        "reply": "$40 is worth $20.",
+        "gap_ms": 383.56
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8107.7,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:56:33",
+      "loadavg": [
+        4.11,
+        3.59,
+        3.23
+      ]
+    },
+    {
+      "system": "cascade-serial-say",
+      "probe": "post-reply",
+      "prompt_id": "t4c",
+      "preceding_turn": {
+        "reply": "$40 - $20 = $20",
+        "gap_ms": 1867.11
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8230.8,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:56:48",
+      "loadavg": [
+        4.05,
+        3.59,
+        3.23
+      ]
+    },
+    {
+      "system": "cascade-serial",
+      "probe": "post-reply",
+      "prompt_id": "t5c",
+      "preceding_turn": {
+        "reply": "Belonging to a good family, having loving relationships, and experiencing personal growth.",
+        "gap_ms": 885.79
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8227.6,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:57:05",
+      "loadavg": [
+        3.88,
+        3.58,
+        3.23
+      ]
+    },
+    {
+      "system": "cascade-fast",
+      "probe": "post-reply",
+      "prompt_id": "t5c",
+      "preceding_turn": {
+        "reply": "Belonging to a good family, having loving relationships, and experiencing personal growth.",
+        "gap_ms": 627.49
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8229.6,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:57:21",
+      "loadavg": [
+        3.73,
+        3.57,
+        3.24
+      ]
+    },
+    {
+      "system": "cascade-fast-tiny",
+      "probe": "post-reply",
+      "prompt_id": "t5c",
+      "preceding_turn": {
+        "reply": "Belonging to a good family, having loving relationships, and experiencing personal growth.",
+        "gap_ms": 503.47
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8108.0,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:57:38",
+      "loadavg": [
+        3.92,
+        3.61,
+        3.26
+      ]
+    },
+    {
+      "system": "cascade-serial-say",
+      "probe": "post-reply",
+      "prompt_id": "t5c",
+      "preceding_turn": {
+        "reply": "Belonging to a good family, having loving relationships, and experiencing personal growth.",
+        "gap_ms": 2029.95
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8223.7,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:57:56",
+      "loadavg": [
+        3.94,
+        3.63,
+        3.27
+      ]
+    },
+    {
+      "system": "cascade-serial",
+      "probe": "post-reply",
+      "prompt_id": "t1d",
+      "preceding_turn": {
+        "reply": "Four.",
+        "gap_ms": 780.39
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8218.0,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:58:08",
+      "loadavg": [
+        4.15,
+        3.68,
+        3.29
+      ]
+    },
+    {
+      "system": "cascade-fast",
+      "probe": "post-reply",
+      "prompt_id": "t1d",
+      "preceding_turn": {
+        "reply": "Four.",
+        "gap_ms": 468.58
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8221.9,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:58:20",
+      "loadavg": [
+        4.37,
+        3.74,
+        3.32
+      ]
+    },
+    {
+      "system": "cascade-fast-tiny",
+      "probe": "post-reply",
+      "prompt_id": "t1d",
+      "preceding_turn": {
+        "reply": "Four.",
+        "gap_ms": 370.41
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8107.1,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:58:31",
+      "loadavg": [
+        4.3,
+        3.75,
+        3.33
+      ]
+    },
+    {
+      "system": "cascade-serial-say",
+      "probe": "post-reply",
+      "prompt_id": "t1d",
+      "preceding_turn": {
+        "reply": "Four.",
+        "gap_ms": 1557.21
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8231.7,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:58:44",
+      "loadavg": [
+        4.6,
+        3.84,
+        3.37
+      ]
+    },
+    {
+      "system": "cascade-serial",
+      "probe": "post-reply",
+      "prompt_id": "t2d",
+      "preceding_turn": {
+        "reply": "April 15, 1912.",
+        "gap_ms": 812.46
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8225.9,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:58:58",
+      "loadavg": [
+        5.11,
+        3.98,
+        3.42
+      ]
+    },
+    {
+      "system": "cascade-fast",
+      "probe": "post-reply",
+      "prompt_id": "t2d",
+      "preceding_turn": {
+        "reply": "April 15, 1912.",
+        "gap_ms": 546.13
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8219.2,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:59:12",
+      "loadavg": [
+        5.23,
+        4.05,
+        3.45
+      ]
+    },
+    {
+      "system": "cascade-fast-tiny",
+      "probe": "post-reply",
+      "prompt_id": "t2d",
+      "preceding_turn": {
+        "reply": "April 15, 1912.",
+        "gap_ms": 392.55
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8113.0,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:59:26",
+      "loadavg": [
+        5.36,
+        4.14,
+        3.5
+      ]
+    },
+    {
+      "system": "cascade-serial-say",
+      "probe": "post-reply",
+      "prompt_id": "t2d",
+      "preceding_turn": {
+        "reply": "April 15, 1912.",
+        "gap_ms": 1740.16
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8228.5,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:59:40",
+      "loadavg": [
+        4.9,
+        4.1,
+        3.49
+      ]
+    },
+    {
+      "system": "cascade-serial",
+      "probe": "post-reply",
+      "prompt_id": "t3d",
+      "preceding_turn": {
+        "reply": "The salt is used to melt ice and snow on roads, helping to prevent accidents.",
+        "gap_ms": 873.24
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8225.0,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "01:59:56",
+      "loadavg": [
+        4.83,
+        4.13,
+        3.51
+      ]
+    },
+    {
+      "system": "cascade-fast",
+      "probe": "post-reply",
+      "prompt_id": "t3d",
+      "preceding_turn": {
+        "reply": "The salt is used to melt ice and snow on roads, helping to prevent accidents.",
+        "gap_ms": 580.35
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8225.5,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "02:00:12",
+      "loadavg": [
+        4.2,
+        4.02,
+        3.49
+      ]
+    },
+    {
+      "system": "cascade-fast-tiny",
+      "probe": "post-reply",
+      "prompt_id": "t3d",
+      "preceding_turn": {
+        "reply": "The salt is used to melt ice and snow on roads, helping to prevent accidents.",
+        "gap_ms": 469.53
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8110.7,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "02:00:28",
+      "loadavg": [
+        3.79,
+        3.94,
+        3.47
+      ]
+    },
+    {
+      "system": "cascade-serial-say",
+      "probe": "post-reply",
+      "prompt_id": "t3d",
+      "preceding_turn": {
+        "reply": "The salt is used to melt ice and snow on roads, helping to prevent accidents.",
+        "gap_ms": 2086.9
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8238.7,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "02:00:46",
+      "loadavg": [
+        3.74,
+        3.91,
+        3.47
+      ]
+    },
+    {
+      "system": "cascade-serial",
+      "probe": "post-reply",
+      "prompt_id": "t4d",
+      "preceding_turn": {
+        "reply": "4.",
+        "gap_ms": 854.81
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8227.0,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "02:00:58",
+      "loadavg": [
+        3.99,
+        3.96,
+        3.49
       ]
     },
     {
@@ -1832,11 +2438,11 @@
       "prompt_id": "t4d",
       "preceding_turn": {
         "reply": "4.",
-        "gap_ms": 470.81
+        "gap_ms": 498.16
       },
       "window_s": 8.0,
       "outcome": "error",
-      "time_to_outcome_ms": 8236.4,
+      "time_to_outcome_ms": 8216.7,
       "hung": false,
       "guard_s": 12.0,
       "agent_audio_ms": 0.0,
@@ -1846,11 +2452,11 @@
       "error": "RuntimeError: no speech found in captured input; nothing to time against",
       "reply": null,
       "transcript": null,
-      "t_wall": "00:39:09",
+      "t_wall": "02:01:10",
       "loadavg": [
-        4.41,
-        4.4,
-        4.7
+        3.77,
+        3.91,
+        3.48
       ]
     },
     {
@@ -1859,11 +2465,11 @@
       "prompt_id": "t4d",
       "preceding_turn": {
         "reply": "4.",
-        "gap_ms": 365.76
+        "gap_ms": 379.12
       },
       "window_s": 8.0,
       "outcome": "error",
-      "time_to_outcome_ms": 8122.9,
+      "time_to_outcome_ms": 8109.3,
       "hung": false,
       "guard_s": 12.0,
       "agent_audio_ms": 0.0,
@@ -1873,11 +2479,38 @@
       "error": "RuntimeError: no speech found in captured input; nothing to time against",
       "reply": null,
       "transcript": null,
-      "t_wall": "00:39:21",
+      "t_wall": "02:01:22",
       "loadavg": [
-        8.69,
-        5.35,
-        5.03
+        3.65,
+        3.88,
+        3.47
+      ]
+    },
+    {
+      "system": "cascade-serial-say",
+      "probe": "post-reply",
+      "prompt_id": "t4d",
+      "preceding_turn": {
+        "reply": "4.",
+        "gap_ms": 1671.3
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8233.8,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "02:01:35",
+      "loadavg": [
+        3.37,
+        3.81,
+        3.45
       ]
     },
     {
@@ -1886,11 +2519,11 @@
       "prompt_id": "t5d",
       "preceding_turn": {
         "reply": "No, machines should not be allowed to make laws.",
-        "gap_ms": 843.01
+        "gap_ms": 876.2
       },
       "window_s": 8.0,
       "outcome": "error",
-      "time_to_outcome_ms": 8236.0,
+      "time_to_outcome_ms": 8225.1,
       "hung": false,
       "guard_s": 12.0,
       "agent_audio_ms": 0.0,
@@ -1900,11 +2533,11 @@
       "error": "RuntimeError: no speech found in captured input; nothing to time against",
       "reply": null,
       "transcript": null,
-      "t_wall": "00:39:35",
+      "t_wall": "02:01:49",
       "loadavg": [
-        7.36,
-        5.22,
-        4.98
+        3.68,
+        3.86,
+        3.48
       ]
     },
     {
@@ -1913,11 +2546,11 @@
       "prompt_id": "t5d",
       "preceding_turn": {
         "reply": "No, machines should not be allowed to make laws.",
-        "gap_ms": 582.93
+        "gap_ms": 550.51
       },
       "window_s": 8.0,
       "outcome": "error",
-      "time_to_outcome_ms": 8282.1,
+      "time_to_outcome_ms": 8219.6,
       "hung": false,
       "guard_s": 12.0,
       "agent_audio_ms": 0.0,
@@ -1927,11 +2560,11 @@
       "error": "RuntimeError: no speech found in captured input; nothing to time against",
       "reply": null,
       "transcript": null,
-      "t_wall": "00:39:50",
+      "t_wall": "02:02:04",
       "loadavg": [
-        7.05,
-        5.24,
-        5.0
+        3.7,
+        3.85,
+        3.48
       ]
     },
     {
@@ -1939,12 +2572,12 @@
       "probe": "post-reply",
       "prompt_id": "t5d",
       "preceding_turn": {
-        "reply": "\"Artificial intelligence systems, if advanced enough, should be granted the capacity to make laws, but only if they are transparent, explainable, and accountable.\"",
-        "gap_ms": 691.74
+        "reply": "\"Human rights and ethics must be the guiding principles.\"",
+        "gap_ms": 418.51
       },
       "window_s": 8.0,
       "outcome": "error",
-      "time_to_outcome_ms": 8116.9,
+      "time_to_outcome_ms": 8101.9,
       "hung": false,
       "guard_s": 12.0,
       "agent_audio_ms": 0.0,
@@ -1954,11 +2587,38 @@
       "error": "RuntimeError: no speech found in captured input; nothing to time against",
       "reply": null,
       "transcript": null,
-      "t_wall": "00:40:11",
+      "t_wall": "02:02:18",
       "loadavg": [
-        5.93,
-        5.11,
-        4.95
+        3.67,
+        3.84,
+        3.48
+      ]
+    },
+    {
+      "system": "cascade-serial-say",
+      "probe": "post-reply",
+      "prompt_id": "t5d",
+      "preceding_turn": {
+        "reply": "No, machines should not be allowed to make laws.",
+        "gap_ms": 1860.61
+      },
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8229.2,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "02:02:34",
+      "loadavg": [
+        3.54,
+        3.8,
+        3.48
       ]
     },
     {
@@ -1967,7 +2627,7 @@
       "preceding_turn": null,
       "window_s": 8.0,
       "outcome": "error",
-      "time_to_outcome_ms": 8227.2,
+      "time_to_outcome_ms": 8219.2,
       "hung": false,
       "guard_s": 12.0,
       "agent_audio_ms": 0.0,
@@ -1977,11 +2637,11 @@
       "error": "RuntimeError: no speech found in captured input; nothing to time against",
       "reply": null,
       "transcript": null,
-      "t_wall": "00:40:19",
+      "t_wall": "02:02:42",
       "loadavg": [
-        6.02,
-        5.14,
-        4.97
+        3.42,
+        3.77,
+        3.47
       ]
     },
     {
@@ -1990,7 +2650,7 @@
       "preceding_turn": null,
       "window_s": 8.0,
       "outcome": "error",
-      "time_to_outcome_ms": 8247.1,
+      "time_to_outcome_ms": 8224.7,
       "hung": false,
       "guard_s": 12.0,
       "agent_audio_ms": 0.0,
@@ -2000,11 +2660,11 @@
       "error": "RuntimeError: no speech found in captured input; nothing to time against",
       "reply": null,
       "transcript": null,
-      "t_wall": "00:40:28",
+      "t_wall": "02:02:51",
       "loadavg": [
-        5.71,
-        5.1,
-        4.95
+        3.27,
+        3.73,
+        3.46
       ]
     },
     {
@@ -2013,7 +2673,7 @@
       "preceding_turn": null,
       "window_s": 8.0,
       "outcome": "error",
-      "time_to_outcome_ms": 8114.1,
+      "time_to_outcome_ms": 8110.0,
       "hung": false,
       "guard_s": 12.0,
       "agent_audio_ms": 0.0,
@@ -2023,17 +2683,40 @@
       "error": "RuntimeError: no speech found in captured input; nothing to time against",
       "reply": null,
       "transcript": null,
-      "t_wall": "00:40:36",
+      "t_wall": "02:02:59",
       "loadavg": [
-        5.66,
-        5.11,
-        4.96
+        3.24,
+        3.7,
+        3.45
+      ]
+    },
+    {
+      "system": "cascade-serial-say",
+      "probe": "cold",
+      "preceding_turn": null,
+      "window_s": 8.0,
+      "outcome": "error",
+      "time_to_outcome_ms": 8227.0,
+      "hung": false,
+      "guard_s": 12.0,
+      "agent_audio_ms": 0.0,
+      "agent_speech_onset_ms": null,
+      "output_peak_dbfs": -240.0,
+      "re_prompted": false,
+      "error": "RuntimeError: no speech found in captured input; nothing to time against",
+      "reply": null,
+      "transcript": null,
+      "t_wall": "02:03:08",
+      "loadavg": [
+        3.3,
+        3.71,
+        3.45
       ]
     }
   ],
   "loadavg_end": [
-    5.66,
-    5.11,
-    4.96
+    3.3,
+    3.71,
+    3.45
   ]
 }
