@@ -226,3 +226,27 @@ Apple M4 Pro, 24 GB, macOS, Python 3.12. Every result file records the git SHA o
 and of the imported agent repo, the loadavg at the start and end of the run, and a
 per-turn timestamp and loadavg. Weights and bulk audio are gitignored; a small demo set is
 committed under `audio/`.
+
+---
+
+## Environment note (documented fallback)
+
+The night this was built, bandwidth was saturated by a sibling repo's 5 GB weight download.
+This repo's own `.venv` finished installing the analysis stack (numpy, scipy, soundfile,
+librosa, praat-parselmouth) but **`mlx-metal`, `faster-whisper`, `sounddevice` and `piper-tts`
+did not finish downloading into it**.
+
+Rather than block, the documented fallback was used: runs execute on the sibling
+`aliveness-threshold` venv's interpreter — which already had the agent stack — with this
+repo's `.venv/lib/python3.12/site-packages` on `PYTHONPATH` for the two extraction
+libraries. Both are CPython 3.12, macOS arm64, so the ABI matches.
+
+```bash
+A=~/Desktop/Playground/aliveness-threshold/.venv/bin/python
+PYTHONPATH=.:$PWD/.venv/lib/python3.12/site-packages $A run_bench.py all
+```
+
+Every results file records `provenance.executable` and `provenance.sys_path_head`, so which
+interpreter produced a given number is checkable rather than remembered. Once `.venv`
+completes, `./run_bench.py` works directly with no `PYTHONPATH` and the fallback can be
+dropped.

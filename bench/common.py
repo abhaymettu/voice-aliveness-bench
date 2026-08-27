@@ -120,6 +120,15 @@ def provenance() -> dict:
         "host": platform.node(),
         "platform": f"{platform.system()} {platform.release()} {platform.machine()}",
         "python": platform.python_version(),
+        # Which interpreter actually produced these numbers. Not decoration:
+        # bandwidth on the night this was built was saturated by a sibling
+        # weight download, this repo's own .venv could not finish installing
+        # mlx/faster-whisper, and the documented fallback was to run on the
+        # sibling repo's interpreter with this repo's .venv site-packages on
+        # PYTHONPATH (both cp312 macOS arm64). A reader has to be able to see
+        # that from the results file rather than take it on trust.
+        "executable": sys.executable,
+        "sys_path_head": [p for p in sys.path[:6] if p],
         "bench_sha": git_sha(ROOT),
         "aliveness_sha": git_sha(ALIVENESS),
         "loadavg_start": [round(v, 2) for v in os.getloadavg()],
