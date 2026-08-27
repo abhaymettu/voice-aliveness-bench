@@ -48,7 +48,11 @@ def open_systems(names, device=None, tts_backend: str = "auto"):
             base, backend = n, tts_backend
             if n.endswith("-say"):
                 base, backend = n[: -len("-say")], "say"
-            if base in CASCADE_CONFIGS:
+            if base.startswith("moshi"):
+                from systems.moshi import MoshiSystem, build as moshi_build
+                moshi_build()  # refuses loudly if the weights are not runnable
+                s = MoshiSystem(n)
+            elif base in CASCADE_CONFIGS:
                 s = Cascade(base, device=device, tts_backend=backend, player=player)
                 s.name = n  # report under the name that was asked for
             else:

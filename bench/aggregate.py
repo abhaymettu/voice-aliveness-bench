@@ -133,7 +133,9 @@ def not_measured(res: dict) -> list[dict]:
     out = []
     try:
         from systems.moshi import status as moshi_status
-        out.append(moshi_status())
+        st = moshi_status()
+        if st.get("status") != "ready":
+            out.append(st)
     except Exception as e:  # noqa: BLE001
         out.append({"name": "moshi-mlx-q4", "status": "not-measured",
                     "reason": f"adapter unavailable: {type(e).__name__}: {e}"})
