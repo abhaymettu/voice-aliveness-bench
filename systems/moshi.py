@@ -58,6 +58,49 @@ NAME = "moshi-mlx-q4"
 EXPECTED_MODEL_BYTES = 4805545317
 REQUIRED = ("model.q4.safetensors", "mimi.safetensors", "tokenizer_spm_32k_3.model")
 
+# A runtime fault found by actually running the stack on 2026-08-27, recorded
+# here so `status()` cannot report "ready" for something that produces nothing.
+# Every line below is a measurement taken on this machine, not a guess.
+#
+#   - both checkpoints are present and byte-exact against the published sizes
+#     (model.q4 4,805,545,317; mimi 384,644,900), and mimi.safetensors parses as
+#     valid safetensors with 318 tensors including the decoder stack
+#   - the model loads in ~2.8 s and generates
+#   - the LM DOES emit audio tokens: 39 of 40 frames returned
+#     `last_audio_tokens()` of shape (1, 8) with plausible codebook values
+#     (ranges 139-1896)
+#   - rustymimi's streaming decoder returned ALL-ZERO PCM for every one of
+#     those 39 frames -- 0/39 decoded to any non-zero sample, on silence input
+#     where Moshi should still emit its own idle audio
+#   - the text head emits fluent-looking but semantically empty token salad
+#
+# So the fault is downstream of the language model, in the Mimi decode path.
+# It is a bug in the sibling repo's integration, not in this benchmark, and
+# this repo does not edit that repo. A shape hypothesis (decode wants
+# (codebooks, frames) rather than the (1, 8) it is handed) was tested and the
+# probe hung: the wrapper's `while out is None: get_decoded()` spin has no
+# timeout, so a decode that never yields hangs the caller forever.
+#
+# Set to None once the sibling's decode path emits audio, and this adapter will
+# report ready and run.
+RUNTIME_FAULT = (
+    "loads and generates, but produces no audio at all: the LM emits valid audio "
+    "tokens (39/40 frames) and rustymimi's decoder returns digital silence for "
+    "every one (0/39 non-zero). Verified on this machine 2026-08-27."
+)
+RUNTIME_DIAGNOSIS = {
+    "checkpoints": "present and byte-exact; mimi.safetensors parses, 318 tensors",
+    "model_load": "ok, ~2.8 s",
+    "lm_audio_tokens": "39/40 frames, shape (1,8), value range 139-1896",
+    "mimi_decode": "0/39 frames decoded to any non-zero sample",
+    "text_head": "emits fluent-looking but semantically empty tokens",
+    "conclusion": "fault is downstream of the LM, in the Mimi decode path",
+    "not_attempted": "no second weight download, and no edit to the sibling repo",
+    "note": "the wrapper's get_decoded() spin has no timeout, so a decode that "
+            "never yields hangs the caller; a shape hypothesis could not be tested "
+            "past that",
+}
+
 
 def status() -> dict:
     """What is actually on disk, measured now. No claims, no inference."""
@@ -83,12 +126,15 @@ def status() -> dict:
         reason = f"weight download incomplete: {'; '.join(partial)}"
     elif not have_wrapper:
         reason = f"no Moshi wrapper at {wrapper}"
+    elif RUNTIME_FAULT:
+        reason = RUNTIME_FAULT
 
     return {
         "name": NAME,
         "kind": "local full-duplex speech-to-speech",
         "status": "not-measured" if reason else "ready",
         "reason": reason,
+        "runtime_diagnosis": RUNTIME_DIAGNOSIS if RUNTIME_FAULT else None,
         "weights_dir": str(MODELS),
         "files": files,
         "wrapper": str(wrapper) if have_wrapper else None,

@@ -38,11 +38,20 @@ models difficulty at all. The tier-5-minus-tier-1 difference is 63–77 ms on ga
 411–818 ms, and 251 ms on the `say` backend — which is not difficulty modelling either, just
 a slower synthesiser paying more for the extra words.
 
-**And four of the five dimensions are floored at zero for every system measured.** Nothing
-yields to an interruption, nothing speaks into silence, no voice carries any conversational
-state, and no gap contains a single sample above the noise floor. Those are real results, not
-missing measurements — each one has a positive control proving the detector would have fired
-if there had been anything to find.
+**And four of the five dimensions are floored at zero for every system measured.**
+
+| dimension | result, pooled across all four systems |
+|---|---|
+| 2. interruption | **0 / 94** landed barge-ins made anything stop early; **0 / 94** reached the transcript |
+| 3. silence | **84 / 84** probes raised an exception; nothing ever spoke, waited gracefully, or hung |
+| 4. prosody vs context | **0 / 4** systems shifted a single prosodic feature with conversational context |
+| 5. non-verbal presence | **0 / 80** gaps contained one sample above −55 dBFS; every gap measured −240 dBFS, literal digital silence |
+
+Those are real results, not missing measurements. Each has a positive control proving the
+detector would have fired if there had been anything to find: the gap detector catches a
+synthetic breath at −33.2 dBFS and stays silent on the no-cue control; the prosody extractor
+resolves a 114 Hz F0-range difference between a flat and an animated rendering of the same
+sentence.
 
 ---
 
@@ -112,7 +121,7 @@ on the no-cue case. The systems read −240 dBFS, which is literal digital silen
 | `cascade-fast` | 540 ms [496–562] | -0.013 | 0/25 | never | none | 0/20 |
 | `cascade-fast-tiny` | 411 ms [374–472] | -0.277 | 0/21 | never | none | 0/20 |
 | `cascade-serial` | 818 ms [772–853] | 0.214 | 0/27 | never | none | 0/20 |
-| `cascade-serial-say` | 1759 ms [1574–1849] | -0.106 | 0/21 | not measured | none | 0/20 |
+| `cascade-serial-say` | 1759 ms [1574–1849] | -0.106 | 0/21 | never | none | 0/20 |
 
 Full per-turn records in `results/*.json`; the aggregated table in `results/aggregate.json`;
 figures in `figures/` (light and dark); the leaderboard with playable audio in
@@ -290,12 +299,38 @@ output device stream, and every turn carries its own timestamp and loadavg.
   records 0 false endpoints on every system.
 - **Difficulty tiers are an a-priori design variable**, assigned before any system ran. They
   are a design choice, not a measurement of difficulty.
-- **Moshi (Kyutai full-duplex, MLX) is NOT-MEASURED.** Its weight download did not finish
-  during the session (3.9 GB of ~5.2 GB fetched; bandwidth was the binding constraint and a
-  second download was deliberately not started). It is the one system in reach that is
-  architecturally capable of scoring above zero on dimensions 2 and 5 — it listens while it
-  speaks and emits a continuous stream — so **its absence is the single biggest hole in these
-  results.** See `systems/moshi.py`, which records the reason and refuses to return a number.
+- **Moshi (Kyutai full-duplex, MLX) is NOT-MEASURED, and it is the biggest hole here.**
+  It is the one system in reach that is architecturally able to score above zero on
+  interruption and non-verbal presence — it listens while it speaks and emits a continuous
+  80 ms frame whether or not it has anything to say. Every cascade config above cannot, by
+  construction.
+
+  The weights did finish downloading, and an adapter for it is written and registered
+  (`systems/moshi.py`). It still produced no measurement, for a reason that was diagnosed
+  rather than guessed:
+
+  - both checkpoints are present and **byte-exact** against the published sizes
+    (`model.q4` 4,805,545,317; `mimi` 384,644,900), and `mimi.safetensors` parses as valid
+    safetensors with 318 tensors including the full decoder stack
+  - the model loads in ~2.8 s and generates, at **rtf 0.896** — faster than real time, so
+    the hardware is not the limit
+  - the language model **does** emit audio tokens: 39 of 40 frames returned
+    `last_audio_tokens()` of shape (1, 8) with plausible codebook values (139–1896)
+  - rustymimi's streaming decoder returned **all-zero PCM for every one of them** — 0/39
+    frames decoded to a single non-zero sample, on silence input where Moshi should still
+    emit its own idle audio
+  - the text head emits fluent-looking but semantically empty token salad
+
+  So the fault sits downstream of the language model, in the Mimi decode path. That is an
+  integration bug in the sibling repo that owns the wrapper, and this repo does not edit that
+  repo. A shape hypothesis (the decoder may want `(codebooks, frames)` rather than the
+  `(1, 8)` it is handed) could not be tested: the wrapper's `while out is None:
+  get_decoded()` spin has no timeout, so a decode that never yields hangs the caller.
+
+  **No number for Moshi appears anywhere in this repo**, and none is estimated or quoted
+  from published claims. `systems/moshi.py::status()` carries the diagnosis and refuses to
+  build.
+
 - **TTS backend variants were not run as separate systems.** All three configurations used
   the piper backend; the macOS `say` fallback appears only as the prosody ceiling reference.
 - The prosody dimension reports `not-measured` when librosa and parselmouth are unavailable,

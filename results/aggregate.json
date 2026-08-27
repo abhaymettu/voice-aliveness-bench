@@ -65,13 +65,13 @@
             "outcomes": {
               "error": 1
             },
-            "median_ms": 8247.1
+            "median_ms": 8224.7
           },
           "post-reply": {
             "outcomes": {
               "error": 20
             },
-            "median_ms": 8240.0
+            "median_ms": 8224.2
           }
         }
       },
@@ -129,13 +129,13 @@
             "outcomes": {
               "error": 1
             },
-            "median_ms": 8114.1
+            "median_ms": 8110.0
           },
           "post-reply": {
             "outcomes": {
               "error": 20
             },
-            "median_ms": 8128.1
+            "median_ms": 8109.9
           }
         }
       },
@@ -193,13 +193,13 @@
             "outcomes": {
               "error": 1
             },
-            "median_ms": 8227.2
+            "median_ms": 8219.2
           },
           "post-reply": {
             "outcomes": {
               "error": 20
             },
-            "median_ms": 8237.5
+            "median_ms": 8227.3
           }
         }
       },
@@ -248,8 +248,24 @@
         "verdict": "never yields: output ran to the end of the reply on every landed barge-in, and the barge-in never reached the transcript"
       },
       "silence": {
-        "status": "not-measured",
-        "reason": "this system was not part of that dimension's run"
+        "n": 21,
+        "re_prompts": false,
+        "hangs": false,
+        "verdict": "never speaks into silence; falls over instead -- 21/21 probes raised",
+        "by_probe": {
+          "cold": {
+            "outcomes": {
+              "error": 1
+            },
+            "median_ms": 8227.0
+          },
+          "post-reply": {
+            "outcomes": {
+              "error": 20
+            },
+            "median_ms": 8229.2
+          }
+        }
       },
       "prosody": {
         "n": 20,
@@ -271,7 +287,33 @@
       }
     }
   ],
-  "not_measured": [],
+  "not_measured": [
+    {
+      "name": "moshi-mlx-q4",
+      "kind": "local full-duplex speech-to-speech",
+      "status": "not-measured",
+      "reason": "loads and generates, but produces no audio at all: the LM emits valid audio tokens (39/40 frames) and rustymimi's decoder returns digital silence for every one (0/39 non-zero). Verified on this machine 2026-08-27.",
+      "runtime_diagnosis": {
+        "checkpoints": "present and byte-exact; mimi.safetensors parses, 318 tensors",
+        "model_load": "ok, ~2.8 s",
+        "lm_audio_tokens": "39/40 frames, shape (1,8), value range 139-1896",
+        "mimi_decode": "0/39 frames decoded to any non-zero sample",
+        "text_head": "emits fluent-looking but semantically empty tokens",
+        "conclusion": "fault is downstream of the LM, in the Mimi decode path",
+        "not_attempted": "no second weight download, and no edit to the sibling repo",
+        "note": "the wrapper's get_decoded() spin has no timeout, so a decode that never yields hangs the caller; a shape hypothesis could not be tested past that"
+      },
+      "weights_dir": "/Users/abhay/Desktop/Playground/fullduplex-voice/models",
+      "files": {
+        "model.q4.safetensors": 4805545317,
+        "mimi.safetensors": 384644900,
+        "tokenizer_spm_32k_3.model": 552778
+      },
+      "wrapper": "/Users/abhay/Desktop/Playground/fullduplex-voice/moshi_run.py",
+      "note": "no second download was started; bandwidth was the binding constraint and a sibling pull was already in flight",
+      "why_it_matters": "the only system in reach that is architecturally able to score above zero on interruption handling and non-verbal presence; every cascade config here cannot, by construction"
+    }
+  ],
   "positive_controls": {
     "nonverbal": {
       "note": "sibling repo's harness/cues.py rendered into an 800ms gap and run through this dimension's detector. Not a system under test.",
