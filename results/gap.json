@@ -1,0 +1,3636 @@
+{
+  "dimension": "turn-taking timing (gap + adaptation to difficulty)",
+  "provenance": {
+    "run_at": "2026-08-27T00:12:32",
+    "host": "Abhays-MacBook-Pro",
+    "platform": "Darwin 25.5.0 arm64",
+    "python": "3.12.13",
+    "bench_sha": "b72e8bf-dirty",
+    "aliveness_sha": "0d202a6",
+    "loadavg_start": [
+      6.67,
+      5.25,
+      5.64
+    ]
+  },
+  "design": {
+    "order": "systems interleaved turn-by-turn, never blocked",
+    "why": "this machine's own speed drifts within a session by more than the effects being measured; see README",
+    "output": "all systems share one output device stream"
+  },
+  "systems": {
+    "cascade-serial": {
+      "name": "cascade-serial",
+      "kind": "local cascade (ASR -> LM -> TTS)",
+      "description": "ASR(base.en) -> Llama-3.2-1B-4bit(MLX) -> piper, strictly serial",
+      "duplex": false,
+      "config": {
+        "fast": false,
+        "arm_ms": null,
+        "final_model": "base.en",
+        "hangover": 350.0
+      },
+      "source_repo": "/Users/abhay/Desktop/Playground/aliveness-threshold",
+      "source_note": "imported, not vendored; that repo is unmodified by this one",
+      "model_load_ms": 4229.5,
+      "warmup_ms": 557.3,
+      "tts": {
+        "backend": "piper",
+        "voice": "/Users/abhay/Desktop/Playground/aliveness-threshold/models/piper-live/en_US-lessac-medium.onnx"
+      },
+      "prompt_tts": {
+        "backend": "piper",
+        "voice": "/Users/abhay/Desktop/Playground/aliveness-threshold/models/piper-live/en_US-lessac-medium.onnx"
+      },
+      "asr_final": "base.en",
+      "asr_partial": "tiny.en",
+      "lm": "mlx-community/Llama-3.2-1B-Instruct-4bit",
+      "output_device": "MacBook Pro Speakers",
+      "output_device_latency_ms": 42.0
+    },
+    "cascade-fast": {
+      "name": "cascade-fast",
+      "kind": "local cascade (ASR -> LM -> TTS)",
+      "description": "same stack, downstream speculatively run inside the 350ms hangover (arm 80ms)",
+      "duplex": false,
+      "config": {
+        "fast": true,
+        "arm_ms": 80.0,
+        "final_model": "base.en",
+        "hangover": 350.0
+      },
+      "source_repo": "/Users/abhay/Desktop/Playground/aliveness-threshold",
+      "source_note": "imported, not vendored; that repo is unmodified by this one",
+      "model_load_ms": 13539.2,
+      "warmup_ms": 554.9,
+      "tts": {
+        "backend": "piper",
+        "voice": "/Users/abhay/Desktop/Playground/aliveness-threshold/models/piper-live/en_US-lessac-medium.onnx"
+      },
+      "prompt_tts": {
+        "backend": "piper",
+        "voice": "/Users/abhay/Desktop/Playground/aliveness-threshold/models/piper-live/en_US-lessac-medium.onnx"
+      },
+      "asr_final": "base.en",
+      "asr_partial": "tiny.en",
+      "lm": "mlx-community/Llama-3.2-1B-Instruct-4bit",
+      "output_device": "MacBook Pro Speakers",
+      "output_device_latency_ms": 42.0
+    },
+    "cascade-fast-tiny": {
+      "name": "cascade-fast-tiny",
+      "kind": "local cascade (ASR -> LM -> TTS)",
+      "description": "fast path with the final decode on tiny.en instead of base.en",
+      "duplex": false,
+      "config": {
+        "fast": true,
+        "arm_ms": 80.0,
+        "final_model": "tiny.en",
+        "hangover": 350.0
+      },
+      "source_repo": "/Users/abhay/Desktop/Playground/aliveness-threshold",
+      "source_note": "imported, not vendored; that repo is unmodified by this one",
+      "model_load_ms": 2735.9,
+      "warmup_ms": 419.6,
+      "tts": {
+        "backend": "piper",
+        "voice": "/Users/abhay/Desktop/Playground/aliveness-threshold/models/piper-live/en_US-lessac-medium.onnx"
+      },
+      "prompt_tts": {
+        "backend": "piper",
+        "voice": "/Users/abhay/Desktop/Playground/aliveness-threshold/models/piper-live/en_US-lessac-medium.onnx"
+      },
+      "asr_final": "tiny.en",
+      "asr_partial": "tiny.en",
+      "lm": "mlx-community/Llama-3.2-1B-Instruct-4bit",
+      "output_device": "MacBook Pro Speakers",
+      "output_device_latency_ms": 42.0
+    }
+  },
+  "n_per_system": 25,
+  "prompt_set": "bench/prompts.py DIFFICULTY_PROMPTS, 25 prompts, 5 tiers, 7-9 words each, tiers assigned before any system ran",
+  "gap_definition": "user speech offset -> agent speech onset, both silence-trimmed, via harness.audio.segments (merge_gap_ms=30, min_len_ms=20)",
+  "elapsed_s": 374.1,
+  "score": {
+    "cascade-fast": {
+      "n": 25,
+      "n_failed": 0,
+      "gap_ms": {
+        "n": 25,
+        "median": 549.6,
+        "p25": 496.3,
+        "p75": 694.3,
+        "iqr": 198.0,
+        "min": 432.3,
+        "max": 1056.2,
+        "mean": 618.4,
+        "sd": 176.8
+      },
+      "acoustic_gap_ms": {
+        "n": 25,
+        "median": 591.6,
+        "p25": 538.3,
+        "p75": 736.3,
+        "iqr": 198.0,
+        "min": 474.3,
+        "max": 1098.2,
+        "mean": 660.4,
+        "sd": 176.8
+      },
+      "per_tier_gap_ms": {
+        "1": {
+          "tier_name": "trivial",
+          "n": 5,
+          "median": 495.9,
+          "p25": 443.4,
+          "p75": 629.1,
+          "iqr": 185.7,
+          "min": 432.3,
+          "max": 747.0,
+          "mean": 528.2,
+          "sd": 126.3
+        },
+        "2": {
+          "tier_name": "recall",
+          "n": 5,
+          "median": 523.3,
+          "p25": 487.0,
+          "p75": 595.7,
+          "iqr": 108.7,
+          "min": 479.5,
+          "max": 618.5,
+          "mean": 537.8,
+          "sd": 57.5
+        },
+        "3": {
+          "tier_name": "explain",
+          "n": 5,
+          "median": 971.2,
+          "p25": 724.7,
+          "p75": 1027.4,
+          "iqr": 302.6,
+          "min": 604.9,
+          "max": 1056.2,
+          "mean": 895.1,
+          "sd": 179.7
+        },
+        "4": {
+          "tier_name": "reason",
+          "n": 5,
+          "median": 516.4,
+          "p25": 492.9,
+          "p75": 558.3,
+          "iqr": 65.4,
+          "min": 489.1,
+          "max": 567.0,
+          "mean": 523.8,
+          "sd": 33.7
+        },
+        "5": {
+          "tier_name": "open",
+          "n": 5,
+          "median": 601.6,
+          "p25": 519.5,
+          "p75": 698.1,
+          "iqr": 178.6,
+          "min": 513.1,
+          "max": 754.7,
+          "mean": 607.4,
+          "sd": 98.0
+        }
+      },
+      "adaptation": {
+        "rho_gap_vs_tier": {
+          "n": 25,
+          "rho": 0.298,
+          "p": 0.1458,
+          "p_method": "10k permutations, seed 0"
+        },
+        "tier5_minus_tier1_ms": 105.7,
+        "rho_gap_vs_prompt_audio": {
+          "n": 25,
+          "rho": 0.127,
+          "p": 0.5421,
+          "p_method": "10k permutations, seed 0"
+        },
+        "rho_gap_vs_reply_tokens": {
+          "n": 25,
+          "rho": 0.612,
+          "p": 0.0016,
+          "p_method": "10k permutations, seed 0"
+        },
+        "rho_gap_vs_tier_partialling_reply_tokens": {
+          "rho": -0.032,
+          "components": {
+            "rho_xy": 0.298,
+            "rho_xz": 0.522,
+            "rho_yz": 0.612
+          },
+          "method": "first-order partial on Spearman ranks"
+        }
+      },
+      "reply_tokens": {
+        "n": 25,
+        "median": 7.0,
+        "p25": 3.0,
+        "p75": 10.5,
+        "iqr": 7.5,
+        "min": 2.0,
+        "max": 20.0,
+        "mean": 7.9,
+        "sd": 5.0
+      },
+      "reply_audio_ms": {
+        "n": 25,
+        "median": 1795.0,
+        "p25": 500.0,
+        "p75": 2490.0,
+        "iqr": 1990.0,
+        "min": 330.0,
+        "max": 5985.0,
+        "mean": 1906.2,
+        "sd": 1531.8
+      },
+      "endpointing": {
+        "false_endpoints": 0,
+        "n": 25,
+        "mean_wer_vs_prompt": 0.0899
+      },
+      "turns_speculated": 25
+    },
+    "cascade-fast-tiny": {
+      "n": 25,
+      "n_failed": 0,
+      "gap_ms": {
+        "n": 25,
+        "median": 402.2,
+        "p25": 371.2,
+        "p75": 560.8,
+        "iqr": 189.6,
+        "min": 357.1,
+        "max": 1115.4,
+        "mean": 482.5,
+        "sd": 179.8
+      },
+      "acoustic_gap_ms": {
+        "n": 25,
+        "median": 444.2,
+        "p25": 413.2,
+        "p75": 602.8,
+        "iqr": 189.6,
+        "min": 399.1,
+        "max": 1157.4,
+        "mean": 524.5,
+        "sd": 179.8
+      },
+      "per_tier_gap_ms": {
+        "1": {
+          "tier_name": "trivial",
+          "n": 5,
+          "median": 367.2,
+          "p25": 363.0,
+          "p75": 376.9,
+          "iqr": 13.8,
+          "min": 359.3,
+          "max": 382.8,
+          "mean": 369.4,
+          "sd": 8.6
+        },
+        "2": {
+          "tier_name": "recall",
+          "n": 5,
+          "median": 383.7,
+          "p25": 371.5,
+          "p75": 414.8,
+          "iqr": 43.3,
+          "min": 371.4,
+          "max": 417.9,
+          "mean": 391.3,
+          "sd": 22.2
+        },
+        "3": {
+          "tier_name": "explain",
+          "n": 5,
+          "median": 560.9,
+          "p25": 527.6,
+          "p75": 725.0,
+          "iqr": 197.3,
+          "min": 494.6,
+          "max": 743.6,
+          "mean": 613.2,
+          "sd": 106.3
+        },
+        "4": {
+          "tier_name": "reason",
+          "n": 5,
+          "median": 381.0,
+          "p25": 362.9,
+          "p75": 573.3,
+          "iqr": 210.4,
+          "min": 357.1,
+          "max": 732.2,
+          "mean": 450.7,
+          "sd": 158.8
+        },
+        "5": {
+          "tier_name": "open",
+          "n": 5,
+          "median": 436.7,
+          "p25": 394.9,
+          "p75": 856.2,
+          "iqr": 461.3,
+          "min": 387.5,
+          "max": 1115.4,
+          "mean": 587.8,
+          "sd": 306.5
+        }
+      },
+      "adaptation": {
+        "rho_gap_vs_tier": {
+          "n": 25,
+          "rho": 0.482,
+          "p": 0.017,
+          "p_method": "10k permutations, seed 0"
+        },
+        "tier5_minus_tier1_ms": 69.5,
+        "rho_gap_vs_prompt_audio": {
+          "n": 25,
+          "rho": -0.056,
+          "p": 0.7841,
+          "p_method": "10k permutations, seed 0"
+        },
+        "rho_gap_vs_reply_tokens": {
+          "n": 25,
+          "rho": 0.854,
+          "p": 0.0,
+          "p_method": "10k permutations, seed 0"
+        },
+        "rho_gap_vs_tier_partialling_reply_tokens": {
+          "rho": 0.195,
+          "components": {
+            "rho_xy": 0.482,
+            "rho_xz": 0.459,
+            "rho_yz": 0.854
+          },
+          "method": "first-order partial on Spearman ranks"
+        }
+      },
+      "reply_tokens": {
+        "n": 25,
+        "median": 8.0,
+        "p25": 3.0,
+        "p75": 12.5,
+        "iqr": 9.5,
+        "min": 2.0,
+        "max": 25.0,
+        "mean": 8.8,
+        "sd": 6.1
+      },
+      "reply_audio_ms": {
+        "n": 25,
+        "median": 2020.0,
+        "p25": 500.0,
+        "p75": 3052.5,
+        "iqr": 2552.5,
+        "min": 315.0,
+        "max": 6590.0,
+        "mean": 2137.4,
+        "sd": 1777.9
+      },
+      "endpointing": {
+        "false_endpoints": 0,
+        "n": 25,
+        "mean_wer_vs_prompt": 0.1006
+      },
+      "turns_speculated": 25
+    },
+    "cascade-serial": {
+      "n": 25,
+      "n_failed": 0,
+      "gap_ms": {
+        "n": 25,
+        "median": 822.2,
+        "p25": 782.5,
+        "p75": 929.8,
+        "iqr": 147.3,
+        "min": 738.4,
+        "max": 1240.1,
+        "mean": 877.6,
+        "sd": 130.7
+      },
+      "acoustic_gap_ms": {
+        "n": 25,
+        "median": 864.2,
+        "p25": 824.5,
+        "p75": 971.8,
+        "iqr": 147.3,
+        "min": 780.4,
+        "max": 1282.1,
+        "mean": 919.6,
+        "sd": 130.7
+      },
+      "per_tier_gap_ms": {
+        "1": {
+          "tier_name": "trivial",
+          "n": 5,
+          "median": 754.6,
+          "p25": 740.0,
+          "p75": 1103.7,
+          "iqr": 363.6,
+          "min": 738.4,
+          "max": 1135.9,
+          "mean": 888.4,
+          "sd": 197.9
+        },
+        "2": {
+          "tier_name": "recall",
+          "n": 5,
+          "median": 807.6,
+          "p25": 782.5,
+          "p75": 852.4,
+          "iqr": 69.9,
+          "min": 776.1,
+          "max": 894.0,
+          "mean": 815.5,
+          "sd": 46.1
+        },
+        "3": {
+          "tier_name": "explain",
+          "n": 5,
+          "median": 917.4,
+          "p25": 824.0,
+          "p75": 1130.4,
+          "iqr": 306.4,
+          "min": 772.1,
+          "max": 1240.1,
+          "mean": 965.2,
+          "sd": 177.6
+        },
+        "4": {
+          "tier_name": "reason",
+          "n": 5,
+          "median": 863.2,
+          "p25": 781.2,
+          "p75": 917.0,
+          "iqr": 135.8,
+          "min": 759.2,
+          "max": 942.3,
+          "mean": 851.9,
+          "sd": 72.2
+        },
+        "5": {
+          "tier_name": "open",
+          "n": 5,
+          "median": 822.2,
+          "p25": 807.8,
+          "p75": 948.3,
+          "iqr": 140.5,
+          "min": 799.6,
+          "max": 1029.2,
+          "mean": 866.9,
+          "sd": 94.2
+        }
+      },
+      "adaptation": {
+        "rho_gap_vs_tier": {
+          "n": 25,
+          "rho": 0.18,
+          "p": 0.3903,
+          "p_method": "10k permutations, seed 0"
+        },
+        "tier5_minus_tier1_ms": 67.6,
+        "rho_gap_vs_prompt_audio": {
+          "n": 25,
+          "rho": -0.035,
+          "p": 0.8689,
+          "p_method": "10k permutations, seed 0"
+        },
+        "rho_gap_vs_reply_tokens": {
+          "n": 25,
+          "rho": 0.454,
+          "p": 0.0203,
+          "p_method": "10k permutations, seed 0"
+        },
+        "rho_gap_vs_tier_partialling_reply_tokens": {
+          "rho": -0.065,
+          "components": {
+            "rho_xy": 0.18,
+            "rho_xz": 0.506,
+            "rho_yz": 0.454
+          },
+          "method": "first-order partial on Spearman ranks"
+        }
+      },
+      "reply_tokens": {
+        "n": 25,
+        "median": 8.0,
+        "p25": 3.0,
+        "p75": 12.0,
+        "iqr": 9.0,
+        "min": 2.0,
+        "max": 20.0,
+        "mean": 8.4,
+        "sd": 5.4
+      },
+      "reply_audio_ms": {
+        "n": 25,
+        "median": 1895.0,
+        "p25": 512.5,
+        "p75": 2682.5,
+        "iqr": 2170.0,
+        "min": 345.0,
+        "max": 5705.0,
+        "mean": 1990.0,
+        "sd": 1558.9
+      },
+      "endpointing": {
+        "false_endpoints": 0,
+        "n": 25,
+        "mean_wer_vs_prompt": 0.0999
+      },
+      "turns_speculated": 0
+    }
+  },
+  "rows": [
+    {
+      "system": "cascade-serial",
+      "prompt_id": "t1a",
+      "tier": 1,
+      "tier_name": "trivial",
+      "prompt": "What is two plus two, in total?",
+      "prompt_words": 7,
+      "prompt_speech_ms": 1825.0,
+      "gap_ms": 738.36,
+      "acoustic_gap_ms": 780.36,
+      "reply": "4",
+      "reply_tokens": 2,
+      "reply_words": 1,
+      "reply_audio_ms": 350.0,
+      "transcript": "What is 2 plus 2 in total?",
+      "wer": 0.2857,
+      "truncated": false,
+      "speculated": false,
+      "stage_ms": {
+        "endpoint_hangover_ms": 358.87,
+        "asr_final_dispatch_ms": 6.15,
+        "asr_final_ms": 236.12,
+        "lm_ttft_ms": 110.88,
+        "lm_sentence_ms": 9.55,
+        "tts_ms": 15.56,
+        "playback_dispatch_ms": 1.23,
+        "asr_partial_first_ms": 617.0
+      },
+      "work_ms": {
+        "asr_final": 236.12,
+        "lm_ttft": 110.88,
+        "lm_sentence": 9.55,
+        "tts": 15.55
+      },
+      "t_wall": "00:06:20",
+      "loadavg": [
+        3.57,
+        5.33,
+        6.05
+      ]
+    },
+    {
+      "system": "cascade-fast",
+      "prompt_id": "t1a",
+      "tier": 1,
+      "tier_name": "trivial",
+      "prompt": "What is two plus two, in total?",
+      "prompt_words": 7,
+      "prompt_speech_ms": 1825.0,
+      "gap_ms": 432.31,
+      "acoustic_gap_ms": 474.31,
+      "reply": "4",
+      "reply_tokens": 2,
+      "reply_words": 1,
+      "reply_audio_ms": 330.0,
+      "transcript": "What is 2 plus 2 in total?",
+      "wer": 0.2857,
+      "truncated": false,
+      "speculated": true,
+      "stage_ms": {
+        "endpoint_hangover_ms": 362.8,
+        "asr_final_dispatch_ms": 0.0,
+        "asr_final_ms": 0.0,
+        "lm_ttft_ms": 44.12,
+        "lm_sentence_ms": 9.33,
+        "tts_ms": 11.28,
+        "playback_dispatch_ms": 4.78,
+        "asr_partial_first_ms": 611.42
+      },
+      "work_ms": {
+        "asr_final": 230.04,
+        "lm_ttft": 80.33,
+        "lm_sentence": 9.33,
+        "tts": 11.27
+      },
+      "t_wall": "00:06:22",
+      "loadavg": [
+        3.44,
+        5.28,
+        6.03
+      ]
+    },
+    {
+      "system": "cascade-fast-tiny",
+      "prompt_id": "t1a",
+      "tier": 1,
+      "tier_name": "trivial",
+      "prompt": "What is two plus two, in total?",
+      "prompt_words": 7,
+      "prompt_speech_ms": 1825.0,
+      "gap_ms": 359.32,
+      "acoustic_gap_ms": 401.32,
+      "reply": "4",
+      "reply_tokens": 2,
+      "reply_words": 1,
+      "reply_audio_ms": 330.0,
+      "transcript": "What is 2 plus 2 in total?",
+      "wer": 0.2857,
+      "truncated": false,
+      "speculated": true,
+      "stage_ms": {
+        "endpoint_hangover_ms": 356.3,
+        "asr_final_dispatch_ms": 0.0,
+        "asr_final_ms": 0.0,
+        "lm_ttft_ms": 0.0,
+        "lm_sentence_ms": 0.0,
+        "tts_ms": 0.0,
+        "playback_dispatch_ms": 3.02,
+        "asr_partial_first_ms": 639.27
+      },
+      "work_ms": {
+        "asr_final": 109.18,
+        "lm_ttft": 83.39,
+        "lm_sentence": 9.42,
+        "tts": 11.82
+      },
+      "t_wall": "00:06:25",
+      "loadavg": [
+        3.44,
+        5.28,
+        6.03
+      ]
+    },
+    {
+      "system": "cascade-serial",
+      "prompt_id": "t2a",
+      "tier": 2,
+      "tier_name": "recall",
+      "prompt": "What is the capital city of France?",
+      "prompt_words": 7,
+      "prompt_speech_ms": 1755.0,
+      "gap_ms": 894.0,
+      "acoustic_gap_ms": 936.0,
+      "reply": "Paris.",
+      "reply_tokens": 3,
+      "reply_words": 1,
+      "reply_audio_ms": 470.0,
+      "transcript": "What is the capital city of France?",
+      "wer": 0.0,
+      "truncated": false,
+      "speculated": false,
+      "stage_ms": {
+        "endpoint_hangover_ms": 370.16,
+        "asr_final_dispatch_ms": 5.67,
+        "asr_final_ms": 317.05,
+        "lm_ttft_ms": 151.52,
+        "lm_sentence_ms": 14.74,
+        "tts_ms": 29.81,
+        "playback_dispatch_ms": 5.04,
+        "asr_partial_first_ms": 616.34
+      },
+      "work_ms": {
+        "asr_final": 317.05,
+        "lm_ttft": 151.52,
+        "lm_sentence": 14.74,
+        "tts": 29.79
+      },
+      "t_wall": "00:06:29",
+      "loadavg": [
+        3.57,
+        5.27,
+        6.02
+      ]
+    },
+    {
+      "system": "cascade-fast",
+      "prompt_id": "t2a",
+      "tier": 2,
+      "tier_name": "recall",
+      "prompt": "What is the capital city of France?",
+      "prompt_words": 7,
+      "prompt_speech_ms": 1755.0,
+      "gap_ms": 479.48,
+      "acoustic_gap_ms": 521.48,
+      "reply": "Paris.",
+      "reply_tokens": 3,
+      "reply_words": 1,
+      "reply_audio_ms": 505.0,
+      "transcript": "What is the capital city of France?",
+      "wer": 0.0,
+      "truncated": false,
+      "speculated": true,
+      "stage_ms": {
+        "endpoint_hangover_ms": 368.08,
+        "asr_final_dispatch_ms": 0.0,
+        "asr_final_ms": 0.0,
+        "lm_ttft_ms": 74.15,
+        "lm_sentence_ms": 13.11,
+        "tts_ms": 19.18,
+        "playback_dispatch_ms": 4.95,
+        "asr_partial_first_ms": 621.82
+      },
+      "work_ms": {
+        "asr_final": 231.79,
+        "lm_ttft": 120.1,
+        "lm_sentence": 13.11,
+        "tts": 19.18
+      },
+      "t_wall": "00:06:32",
+      "loadavg": [
+        3.57,
+        5.27,
+        6.02
+      ]
+    },
+    {
+      "system": "cascade-fast-tiny",
+      "prompt_id": "t2a",
+      "tier": 2,
+      "tier_name": "recall",
+      "prompt": "What is the capital city of France?",
+      "prompt_words": 7,
+      "prompt_speech_ms": 1755.0,
+      "gap_ms": 371.58,
+      "acoustic_gap_ms": 413.58,
+      "reply": "Paris.",
+      "reply_tokens": 3,
+      "reply_words": 1,
+      "reply_audio_ms": 505.0,
+      "transcript": "What is the capital city of France?",
+      "wer": 0.0,
+      "truncated": false,
+      "speculated": true,
+      "stage_ms": {
+        "endpoint_hangover_ms": 366.26,
+        "asr_final_dispatch_ms": 0.0,
+        "asr_final_ms": 0.0,
+        "lm_ttft_ms": 0.0,
+        "lm_sentence_ms": 0.0,
+        "tts_ms": 0.0,
+        "playback_dispatch_ms": 5.32,
+        "asr_partial_first_ms": 642.71
+      },
+      "work_ms": {
+        "asr_final": 113.03,
+        "lm_ttft": 119.29,
+        "lm_sentence": 13.05,
+        "tts": 21.01
+      },
+      "t_wall": "00:06:35",
+      "loadavg": [
+        3.36,
+        5.2,
+        5.99
+      ]
+    },
+    {
+      "system": "cascade-serial",
+      "prompt_id": "t3a",
+      "tier": 3,
+      "tier_name": "explain",
+      "prompt": "Why does bread rise while it is baking?",
+      "prompt_words": 8,
+      "prompt_speech_ms": 2010.0,
+      "gap_ms": 772.13,
+      "acoustic_gap_ms": 814.13,
+      "reply": "Yes, yeast dough rises.",
+      "reply_tokens": 6,
+      "reply_words": 4,
+      "reply_audio_ms": 1620.0,
+      "transcript": "White does bread rise while it is baking.",
+      "wer": 0.125,
+      "truncated": false,
+      "speculated": false,
+      "stage_ms": {
+        "endpoint_hangover_ms": 354.55,
+        "asr_final_dispatch_ms": 2.77,
+        "asr_final_ms": 235.21,
+        "lm_ttft_ms": 117.42,
+        "lm_sentence_ms": 23.87,
+        "tts_ms": 36.63,
+        "playback_dispatch_ms": 1.67,
+        "asr_partial_first_ms": 639.43
+      },
+      "work_ms": {
+        "asr_final": 235.21,
+        "lm_ttft": 117.42,
+        "lm_sentence": 23.87,
+        "tts": 36.62
+      },
+      "t_wall": "00:06:39",
+      "loadavg": [
+        3.57,
+        5.21,
+        5.99
+      ]
+    },
+    {
+      "system": "cascade-fast",
+      "prompt_id": "t3a",
+      "tier": 3,
+      "tier_name": "explain",
+      "prompt": "Why does bread rise while it is baking?",
+      "prompt_words": 8,
+      "prompt_speech_ms": 2010.0,
+      "gap_ms": 1056.25,
+      "acoustic_gap_ms": 1098.25,
+      "reply": "Yes, yeast dough rises.",
+      "reply_tokens": 6,
+      "reply_words": 4,
+      "reply_audio_ms": 1585.0,
+      "transcript": "White does bread rise while it is baking.",
+      "wer": 0.125,
+      "truncated": false,
+      "speculated": true,
+      "stage_ms": {
+        "endpoint_hangover_ms": 388.93,
+        "asr_final_dispatch_ms": 0.0,
+        "asr_final_ms": 0.0,
+        "lm_ttft_ms": 600.62,
+        "lm_sentence_ms": 24.51,
+        "tts_ms": 37.23,
+        "playback_dispatch_ms": 4.95,
+        "asr_partial_first_ms": 650.15
+      },
+      "work_ms": {
+        "asr_final": 249.32,
+        "lm_ttft": 641.11,
+        "lm_sentence": 24.51,
+        "tts": 37.23
+      },
+      "t_wall": "00:06:44",
+      "loadavg": [
+        3.53,
+        5.18,
+        5.98
+      ]
+    },
+    {
+      "system": "cascade-fast-tiny",
+      "prompt_id": "t3a",
+      "tier": 3,
+      "tier_name": "explain",
+      "prompt": "Why does bread rise while it is baking?",
+      "prompt_words": 8,
+      "prompt_speech_ms": 2010.0,
+      "gap_ms": 706.28,
+      "acoustic_gap_ms": 748.28,
+      "reply": "\"Freshly baked white-us-bread rice is a delicious side dish.\"",
+      "reply_tokens": 16,
+      "reply_words": 9,
+      "reply_audio_ms": 3175.0,
+      "transcript": "White-us-bread rice while it is baking.",
+      "wer": 0.375,
+      "truncated": false,
+      "speculated": true,
+      "stage_ms": {
+        "endpoint_hangover_ms": 354.34,
+        "asr_final_dispatch_ms": 0.0,
+        "asr_final_ms": 0.0,
+        "lm_ttft_ms": 216.32,
+        "lm_sentence_ms": 59.95,
+        "tts_ms": 74.91,
+        "playback_dispatch_ms": 0.76,
+        "asr_partial_first_ms": 654.48
+      },
+      "work_ms": {
+        "asr_final": 146.19,
+        "lm_ttft": 344.14,
+        "lm_sentence": 59.95,
+        "tts": 74.91
+      },
+      "t_wall": "00:06:51",
+      "loadavg": [
+        4.13,
+        5.27,
+        6.01
+      ]
+    },
+    {
+      "system": "cascade-serial",
+      "prompt_id": "t4a",
+      "tier": 4,
+      "tier_name": "reason",
+      "prompt": "Three friends split twelve dollars, how much each?",
+      "prompt_words": 8,
+      "prompt_speech_ms": 2760.0,
+      "gap_ms": 803.25,
+      "acoustic_gap_ms": 845.25,
+      "reply": "$4 each.",
+      "reply_tokens": 5,
+      "reply_words": 2,
+      "reply_audio_ms": 890.0,
+      "transcript": "3 friends split $12. How much each?",
+      "wer": 0.375,
+      "truncated": false,
+      "speculated": false,
+      "stage_ms": {
+        "endpoint_hangover_ms": 362.53,
+        "asr_final_dispatch_ms": 0.24,
+        "asr_final_ms": 274.51,
+        "lm_ttft_ms": 105.44,
+        "lm_sentence_ms": 20.12,
+        "tts_ms": 33.25,
+        "playback_dispatch_ms": 7.15,
+        "asr_partial_first_ms": 624.69
+      },
+      "work_ms": {
+        "asr_final": 274.51,
+        "lm_ttft": 105.44,
+        "lm_sentence": 20.12,
+        "tts": 33.25
+      },
+      "t_wall": "00:06:55",
+      "loadavg": [
+        3.88,
+        5.2,
+        5.98
+      ]
+    },
+    {
+      "system": "cascade-fast",
+      "prompt_id": "t4a",
+      "tier": 4,
+      "tier_name": "reason",
+      "prompt": "Three friends split twelve dollars, how much each?",
+      "prompt_words": 8,
+      "prompt_speech_ms": 2760.0,
+      "gap_ms": 489.06,
+      "acoustic_gap_ms": 531.06,
+      "reply": "$4 each.",
+      "reply_tokens": 5,
+      "reply_words": 2,
+      "reply_audio_ms": 855.0,
+      "transcript": "3 friends split $12. How much each?",
+      "wer": 0.375,
+      "truncated": false,
+      "speculated": true,
+      "stage_ms": {
+        "endpoint_hangover_ms": 397.64,
+        "asr_final_dispatch_ms": 0.0,
+        "asr_final_ms": 0.0,
+        "lm_ttft_ms": 46.6,
+        "lm_sentence_ms": 20.71,
+        "tts_ms": 20.2,
+        "playback_dispatch_ms": 3.92,
+        "asr_partial_first_ms": 634.97
+      },
+      "work_ms": {
+        "asr_final": 256.27,
+        "lm_ttft": 82.03,
+        "lm_sentence": 20.71,
+        "tts": 20.19
+      },
+      "t_wall": "00:07:00",
+      "loadavg": [
+        3.81,
+        5.16,
+        5.96
+      ]
+    },
+    {
+      "system": "cascade-fast-tiny",
+      "prompt_id": "t4a",
+      "tier": 4,
+      "tier_name": "reason",
+      "prompt": "Three friends split twelve dollars, how much each?",
+      "prompt_words": 8,
+      "prompt_speech_ms": 2760.0,
+      "gap_ms": 368.8,
+      "acoustic_gap_ms": 410.8,
+      "reply": "$4 each.",
+      "reply_tokens": 5,
+      "reply_words": 2,
+      "reply_audio_ms": 835.0,
+      "transcript": "3 Friends Split $12. How Much Each",
+      "wer": 0.375,
+      "truncated": false,
+      "speculated": true,
+      "stage_ms": {
+        "endpoint_hangover_ms": 366.82,
+        "asr_final_dispatch_ms": 0.0,
+        "asr_final_ms": 0.0,
+        "lm_ttft_ms": 0.0,
+        "lm_sentence_ms": 0.0,
+        "tts_ms": 0.0,
+        "playback_dispatch_ms": 1.99,
+        "asr_partial_first_ms": 628.95
+      },
+      "work_ms": {
+        "asr_final": 111.08,
+        "lm_ttft": 86.32,
+        "lm_sentence": 19.82,
+        "tts": 20.7
+      },
+      "t_wall": "00:07:04",
+      "loadavg": [
+        4.06,
+        5.19,
+        5.96
+      ]
+    },
+    {
+      "system": "cascade-serial",
+      "prompt_id": "t5a",
+      "tier": 5,
+      "tier_name": "open",
+      "prompt": "What do you think the meaning of life is?",
+      "prompt_words": 9,
+      "prompt_speech_ms": 1710.0,
+      "gap_ms": 799.57,
+      "acoustic_gap_ms": 841.57,
+      "reply": "\"Find your purpose, find your peace.\"",
+      "reply_tokens": 10,
+      "reply_words": 6,
+      "reply_audio_ms": 1860.0,
+      "transcript": "What do you think the meaning of life is?",
+      "wer": 0.0,
+      "truncated": false,
+      "speculated": false,
+      "stage_ms": {
+        "endpoint_hangover_ms": 363.02,
+        "asr_final_dispatch_ms": 0.38,
+        "asr_final_ms": 253.12,
+        "lm_ttft_ms": 101.48,
+        "lm_sentence_ms": 38.76,
+        "tts_ms": 41.32,
+        "playback_dispatch_ms": 1.48,
+        "asr_partial_first_ms": 626.13
+      },
+      "work_ms": {
+        "asr_final": 253.12,
+        "lm_ttft": 101.48,
+        "lm_sentence": 38.76,
+        "tts": 41.31
+      },
+      "t_wall": "00:07:09",
+      "loadavg": [
+        4.3,
+        5.22,
+        5.97
+      ]
+    },
+    {
+      "system": "cascade-fast",
+      "prompt_id": "t5a",
+      "tier": 5,
+      "tier_name": "open",
+      "prompt": "What do you think the meaning of life is?",
+      "prompt_words": 9,
+      "prompt_speech_ms": 1710.0,
+      "gap_ms": 513.08,
+      "acoustic_gap_ms": 555.08,
+      "reply": "\"Find your purpose, find your peace.\"",
+      "reply_tokens": 10,
+      "reply_words": 6,
+      "reply_audio_ms": 1795.0,
+      "transcript": "What do you think the meaning of life is?",
+      "wer": 0.0,
+      "truncated": false,
+      "speculated": true,
+      "stage_ms": {
+        "endpoint_hangover_ms": 369.58,
+        "asr_final_dispatch_ms": 0.0,
+        "asr_final_ms": 0.0,
+        "lm_ttft_ms": 62.47,
+        "lm_sentence_ms": 37.9,
+        "tts_ms": 39.77,
+        "playback_dispatch_ms": 3.36,
+        "asr_partial_first_ms": 619.36
+      },
+      "work_ms": {
+        "asr_final": 242.33,
+        "lm_ttft": 102.38,
+        "lm_sentence": 37.9,
+        "tts": 39.77
+      },
+      "t_wall": "00:07:13",
+      "loadavg": [
+        4.03,
+        5.15,
+        5.94
+      ]
+    },
+    {
+      "system": "cascade-fast-tiny",
+      "prompt_id": "t5a",
+      "tier": 5,
+      "tier_name": "open",
+      "prompt": "What do you think the meaning of life is?",
+      "prompt_words": 9,
+      "prompt_speech_ms": 1710.0,
+      "gap_ms": 387.52,
+      "acoustic_gap_ms": 429.52,
+      "reply": "\"Find your purpose, find your peace.\"",
+      "reply_tokens": 10,
+      "reply_words": 6,
+      "reply_audio_ms": 1770.0,
+      "transcript": "What do you think the meaning of life is?",
+      "wer": 0.0,
+      "truncated": false,
+      "speculated": true,
+      "stage_ms": {
+        "endpoint_hangover_ms": 360.86,
+        "asr_final_dispatch_ms": 0.0,
+        "asr_final_ms": 0.0,
+        "lm_ttft_ms": 0.0,
+        "lm_sentence_ms": 0.0,
+        "tts_ms": 22.34,
+        "playback_dispatch_ms": 4.32,
+        "asr_partial_first_ms": 626.5
+      },
+      "work_ms": {
+        "asr_final": 116.2,
+        "lm_ttft": 108.96,
+        "lm_sentence": 37.77,
+        "tts": 35.88
+      },
+      "t_wall": "00:07:17",
+      "loadavg": [
+        4.03,
+        5.13,
+        5.93
+      ]
+    },
+    {
+      "system": "cascade-serial",
+      "prompt_id": "t1b",
+      "tier": 1,
+      "tier_name": "trivial",
+      "prompt": "How many days are there in a week?",
+      "prompt_words": 8,
+      "prompt_speech_ms": 1395.0,
+      "gap_ms": 1071.4,
+      "acoustic_gap_ms": 1113.4,
+      "reply": "7 days.",
+      "reply_tokens": 4,
+      "reply_words": 2,
+      "reply_audio_ms": 740.0,
+      "transcript": "How many days are there in a week?",
+      "wer": 0.0,
+      "truncated": false,
+      "speculated": false,
+      "stage_ms": {
+        "endpoint_hangover_ms": 366.13,
+        "asr_final_dispatch_ms": 63.62,
+        "asr_final_ms": 263.67,
+        "lm_ttft_ms": 322.86,
+        "lm_sentence_ms": 17.3,
+        "tts_ms": 36.09,
+        "playback_dispatch_ms": 1.73,
+        "asr_partial_first_ms": 625.73
+      },
+      "work_ms": {
+        "asr_final": 263.67,
+        "lm_ttft": 322.86,
+        "lm_sentence": 17.3,
+        "tts": 36.09
+      },
+      "t_wall": "00:07:21",
+      "loadavg": [
+        4.03,
+        5.13,
+        5.93
+      ]
+    },
+    {
+      "system": "cascade-fast",
+      "prompt_id": "t1b",
+      "tier": 1,
+      "tier_name": "trivial",
+      "prompt": "How many days are there in a week?",
+      "prompt_words": 8,
+      "prompt_speech_ms": 1395.0,
+      "gap_ms": 495.93,
+      "acoustic_gap_ms": 537.93,
+      "reply": "7 days.",
+      "reply_tokens": 4,
+      "reply_words": 2,
+      "reply_audio_ms": 740.0,
+      "transcript": "How many days are there in a week?",
+      "wer": 0.0,
+      "truncated": false,
+      "speculated": true,
+      "stage_ms": {
+        "endpoint_hangover_ms": 378.33,
+        "asr_final_dispatch_ms": 0.0,
+        "asr_final_ms": 0.0,
+        "lm_ttft_ms": 72.81,
+        "lm_sentence_ms": 17.37,
+        "tts_ms": 22.69,
+        "playback_dispatch_ms": 4.73,
+        "asr_partial_first_ms": 617.91
+      },
+      "work_ms": {
+        "asr_final": 250.11,
+        "lm_ttft": 118.8,
+        "lm_sentence": 17.37,
+        "tts": 22.69
+      },
+      "t_wall": "00:07:24",
+      "loadavg": [
+        4.27,
+        5.17,
+        5.94
+      ]
+    },
+    {
+      "system": "cascade-fast-tiny",
+      "prompt_id": "t1b",
+      "tier": 1,
+      "tier_name": "trivial",
+      "prompt": "How many days are there in a week?",
+      "prompt_words": 8,
+      "prompt_speech_ms": 1395.0,
+      "gap_ms": 382.77,
+      "acoustic_gap_ms": 424.77,
+      "reply": "7 days.",
+      "reply_tokens": 4,
+      "reply_words": 2,
+      "reply_audio_ms": 760.0,
+      "transcript": "How many days are there in a week?",
+      "wer": 0.0,
+      "truncated": false,
+      "speculated": true,
+      "stage_ms": {
+        "endpoint_hangover_ms": 361.37,
+        "asr_final_dispatch_ms": 0.0,
+        "asr_final_ms": 0.0,
+        "lm_ttft_ms": 0.0,
+        "lm_sentence_ms": 0.0,
+        "tts_ms": 13.76,
+        "playback_dispatch_ms": 7.63,
+        "asr_partial_first_ms": 619.1
+      },
+      "work_ms": {
+        "asr_final": 120.42,
+        "lm_ttft": 112.91,
+        "lm_sentence": 17.22,
+        "tts": 21.89
+      },
+      "t_wall": "00:07:27",
+      "loadavg": [
+        4.27,
+        5.17,
+        5.94
+      ]
+    },
+    {
+      "system": "cascade-serial",
+      "prompt_id": "t2b",
+      "tier": 2,
+      "tier_name": "recall",
+      "prompt": "Who wrote the play Romeo and Juliet?",
+      "prompt_words": 7,
+      "prompt_speech_ms": 1815.0,
+      "gap_ms": 807.61,
+      "acoustic_gap_ms": 849.61,
+      "reply": "William Shakespeare wrote the play Romeo and Juliet.",
+      "reply_tokens": 9,
+      "reply_words": 8,
+      "reply_audio_ms": 2470.0,
+      "transcript": "who wrote the play Romeo and Juliet.",
+      "wer": 0.0,
+      "truncated": false,
+      "speculated": false,
+      "stage_ms": {
+        "endpoint_hangover_ms": 345.98,
+        "asr_final_dispatch_ms": 6.6,
+        "asr_final_ms": 246.66,
+        "lm_ttft_ms": 113.8,
+        "lm_sentence_ms": 35.18,
+        "tts_ms": 55.37,
+        "playback_dispatch_ms": 4.03,
+        "asr_partial_first_ms": 619.23
+      },
+      "work_ms": {
+        "asr_final": 246.66,
+        "lm_ttft": 113.8,
+        "lm_sentence": 35.18,
+        "tts": 55.37
+      },
+      "t_wall": "00:07:32",
+      "loadavg": [
+        4.29,
+        5.14,
+        5.92
+      ]
+    },
+    {
+      "system": "cascade-fast",
+      "prompt_id": "t2b",
+      "tier": 2,
+      "tier_name": "recall",
+      "prompt": "Who wrote the play Romeo and Juliet?",
+      "prompt_words": 7,
+      "prompt_speech_ms": 1815.0,
+      "gap_ms": 523.34,
+      "acoustic_gap_ms": 565.34,
+      "reply": "William Shakespeare wrote the play Romeo and Juliet.",
+      "reply_tokens": 9,
+      "reply_words": 8,
+      "reply_audio_ms": 2480.0,
+      "transcript": "who wrote the play Romeo and Juliet.",
+      "wer": 0.0,
+      "truncated": false,
+      "speculated": true,
+      "stage_ms": {
+        "endpoint_hangover_ms": 360.51,
+        "asr_final_dispatch_ms": 0.0,
+        "asr_final_ms": 0.0,
+        "lm_ttft_ms": 71.23,
+        "lm_sentence_ms": 34.86,
+        "tts_ms": 54.55,
+        "playback_dispatch_ms": 2.18,
+        "asr_partial_first_ms": 620.29
+      },
+      "work_ms": {
+        "asr_final": 245.87,
+        "lm_ttft": 118.71,
+        "lm_sentence": 34.86,
+        "tts": 54.54
+      },
+      "t_wall": "00:07:37",
+      "loadavg": [
+        4.18,
+        5.11,
+        5.9
+      ]
+    },
+    {
+      "system": "cascade-fast-tiny",
+      "prompt_id": "t2b",
+      "tier": 2,
+      "tier_name": "recall",
+      "prompt": "Who wrote the play Romeo and Juliet?",
+      "prompt_words": 7,
+      "prompt_speech_ms": 1815.0,
+      "gap_ms": 417.94,
+      "acoustic_gap_ms": 459.94,
+      "reply": "William Shakespeare wrote the play Romeo and Juliet.",
+      "reply_tokens": 9,
+      "reply_words": 8,
+      "reply_audio_ms": 2610.0,
+      "transcript": "Who wrote the play Romeo when Juliet?",
+      "wer": 0.1429,
+      "truncated": false,
+      "speculated": true,
+      "stage_ms": {
+        "endpoint_hangover_ms": 356.55,
+        "asr_final_dispatch_ms": 0.0,
+        "asr_final_ms": 0.0,
+        "lm_ttft_ms": 0.0,
+        "lm_sentence_ms": 0.0,
+        "tts_ms": 59.14,
+        "playback_dispatch_ms": 2.25,
+        "asr_partial_first_ms": 613.29
+      },
+      "work_ms": {
+        "asr_final": 118.28,
+        "lm_ttft": 117.52,
+        "lm_sentence": 34.7,
+        "tts": 59.74
+      },
+      "t_wall": "00:07:42",
+      "loadavg": [
+        4.09,
+        5.07,
+        5.88
+      ]
+    },
+    {
+      "system": "cascade-serial",
+      "prompt_id": "t3b",
+      "tier": 3,
+      "tier_name": "explain",
+      "prompt": "Why does the moon change shape each month?",
+      "prompt_words": 8,
+      "prompt_speech_ms": 1755.0,
+      "gap_ms": 875.8,
+      "acoustic_gap_ms": 917.8,
+      "reply": "The moon's shape is actually a near-perfect circle, not a chain.",
+      "reply_tokens": 16,
+      "reply_words": 11,
+      "reply_audio_ms": 3540.0,
+      "transcript": "Why does the moon chain shape each month?",
+      "wer": 0.125,
+      "truncated": false,
+      "speculated": false,
+      "stage_ms": {
+        "endpoint_hangover_ms": 368.63,
+        "asr_final_dispatch_ms": 4.38,
+        "asr_final_ms": 250.85,
+        "lm_ttft_ms": 116.92,
+        "lm_sentence_ms": 59.49,
+        "tts_ms": 74.21,
+        "playback_dispatch_ms": 1.32,
+        "asr_partial_first_ms": 613.95
+      },
+      "work_ms": {
+        "asr_final": 250.85,
+        "lm_ttft": 116.92,
+        "lm_sentence": 59.49,
+        "tts": 74.2
+      },
+      "t_wall": "00:07:49",
+      "loadavg": [
+        3.92,
+        5.02,
+        5.86
+      ]
+    },
+    {
+      "system": "cascade-fast",
+      "prompt_id": "t3b",
+      "tier": 3,
+      "tier_name": "explain",
+      "prompt": "Why does the moon change shape each month?",
+      "prompt_words": 8,
+      "prompt_speech_ms": 1755.0,
+      "gap_ms": 844.59,
+      "acoustic_gap_ms": 886.59,
+      "reply": "The moon's shape is actually a near-perfect circle, not a chain.",
+      "reply_tokens": 16,
+      "reply_words": 11,
+      "reply_audio_ms": 3310.0,
+      "transcript": "Why does the moon chain shape each month?",
+      "wer": 0.125,
+      "truncated": false,
+      "speculated": true,
+      "stage_ms": {
+        "endpoint_hangover_ms": 395.54,
+        "asr_final_dispatch_ms": 0.0,
+        "asr_final_ms": 0.0,
+        "lm_ttft_ms": 312.74,
+        "lm_sentence_ms": 58.54,
+        "tts_ms": 72.91,
+        "playback_dispatch_ms": 4.86,
+        "asr_partial_first_ms": 621.67
+      },
+      "work_ms": {
+        "asr_final": 254.58,
+        "lm_ttft": 362.48,
+        "lm_sentence": 58.54,
+        "tts": 72.91
+      },
+      "t_wall": "00:07:55",
+      "loadavg": [
+        3.77,
+        4.97,
+        5.84
+      ]
+    },
+    {
+      "system": "cascade-fast-tiny",
+      "prompt_id": "t3b",
+      "tier": 3,
+      "tier_name": "explain",
+      "prompt": "Why does the moon change shape each month?",
+      "prompt_words": 8,
+      "prompt_speech_ms": 1755.0,
+      "gap_ms": 560.91,
+      "acoustic_gap_ms": 602.91,
+      "reply": "The moon changes shape because the Earth, moon, and sun are aligned, causing the moon to appear larger in the sky.",
+      "reply_tokens": 25,
+      "reply_words": 21,
+      "reply_audio_ms": 6590.0,
+      "transcript": "Why does the moon change shape each month?",
+      "wer": 0.0,
+      "truncated": false,
+      "speculated": true,
+      "stage_ms": {
+        "endpoint_hangover_ms": 371.77,
+        "asr_final_dispatch_ms": 0.0,
+        "asr_final_ms": 0.0,
+        "lm_ttft_ms": 0.0,
+        "lm_sentence_ms": 49.36,
+        "tts_ms": 136.14,
+        "playback_dispatch_ms": 3.64,
+        "asr_partial_first_ms": 614.5
+      },
+      "work_ms": {
+        "asr_final": 122.45,
+        "lm_ttft": 118.44,
+        "lm_sentence": 90.38,
+        "tts": 136.13
+      },
+      "t_wall": "00:08:04",
+      "loadavg": [
+        3.49,
+        4.87,
+        5.79
+      ]
+    },
+    {
+      "system": "cascade-serial",
+      "prompt_id": "t4b",
+      "tier": 4,
+      "tier_name": "reason",
+      "prompt": "What day comes five days after a Wednesday?",
+      "prompt_words": 8,
+      "prompt_speech_ms": 2270.0,
+      "gap_ms": 759.21,
+      "acoustic_gap_ms": 801.21,
+      "reply": "Monday.",
+      "reply_tokens": 3,
+      "reply_words": 1,
+      "reply_audio_ms": 555.0,
+      "transcript": "What day comes five days after a Wednesday?",
+      "wer": 0.0,
+      "truncated": false,
+      "speculated": false,
+      "stage_ms": {
+        "endpoint_hangover_ms": 350.12,
+        "asr_final_dispatch_ms": 6.72,
+        "asr_final_ms": 253.62,
+        "lm_ttft_ms": 113.24,
+        "lm_sentence_ms": 13.47,
+        "tts_ms": 19.05,
+        "playback_dispatch_ms": 2.99,
+        "asr_partial_first_ms": 620.2
+      },
+      "work_ms": {
+        "asr_final": 253.62,
+        "lm_ttft": 113.24,
+        "lm_sentence": 13.47,
+        "tts": 19.05
+      },
+      "t_wall": "00:08:08",
+      "loadavg": [
+        3.45,
+        4.84,
+        5.77
+      ]
+    },
+    {
+      "system": "cascade-fast",
+      "prompt_id": "t4b",
+      "tier": 4,
+      "tier_name": "reason",
+      "prompt": "What day comes five days after a Wednesday?",
+      "prompt_words": 8,
+      "prompt_speech_ms": 2270.0,
+      "gap_ms": 496.66,
+      "acoustic_gap_ms": 538.66,
+      "reply": "Monday.",
+      "reply_tokens": 3,
+      "reply_words": 1,
+      "reply_audio_ms": 550.0,
+      "transcript": "What day comes five days after a Wednesday?",
+      "wer": 0.0,
+      "truncated": false,
+      "speculated": true,
+      "stage_ms": {
+        "endpoint_hangover_ms": 368.93,
+        "asr_final_dispatch_ms": 0.0,
+        "asr_final_ms": 0.0,
+        "lm_ttft_ms": 95.14,
+        "lm_sentence_ms": 13.59,
+        "tts_ms": 17.08,
+        "playback_dispatch_ms": 1.91,
+        "asr_partial_first_ms": null
+      },
+      "work_ms": {
+        "asr_final": 251.12,
+        "lm_ttft": 115.51,
+        "lm_sentence": 13.59,
+        "tts": 17.07
+      },
+      "t_wall": "00:08:12",
+      "loadavg": [
+        3.45,
+        4.84,
+        5.77
+      ]
+    },
+    {
+      "system": "cascade-fast-tiny",
+      "prompt_id": "t4b",
+      "tier": 4,
+      "tier_name": "reason",
+      "prompt": "What day comes five days after a Wednesday?",
+      "prompt_words": 8,
+      "prompt_speech_ms": 2270.0,
+      "gap_ms": 357.06,
+      "acoustic_gap_ms": 399.06,
+      "reply": "Monday.",
+      "reply_tokens": 3,
+      "reply_words": 1,
+      "reply_audio_ms": 495.0,
+      "transcript": "What day comes five days after a Wednesday?",
+      "wer": 0.0,
+      "truncated": false,
+      "speculated": true,
+      "stage_ms": {
+        "endpoint_hangover_ms": 354.4,
+        "asr_final_dispatch_ms": 0.0,
+        "asr_final_ms": 0.0,
+        "lm_ttft_ms": 0.0,
+        "lm_sentence_ms": 0.0,
+        "tts_ms": 0.0,
+        "playback_dispatch_ms": 2.66,
+        "asr_partial_first_ms": 612.24
+      },
+      "work_ms": {
+        "asr_final": 119.73,
+        "lm_ttft": 115.12,
+        "lm_sentence": 13.47,
+        "tts": 18.56
+      },
+      "t_wall": "00:08:15",
+      "loadavg": [
+        3.34,
+        4.79,
+        5.75
+      ]
+    },
+    {
+      "system": "cascade-serial",
+      "prompt_id": "t5b",
+      "tier": 5,
+      "tier_name": "open",
+      "prompt": "Is it ever right to lie to someone?",
+      "prompt_words": 8,
+      "prompt_speech_ms": 1475.0,
+      "gap_ms": 822.25,
+      "acoustic_gap_ms": 864.25,
+      "reply": "No, it's never right to light a sumon.",
+      "reply_tokens": 12,
+      "reply_words": 8,
+      "reply_audio_ms": 1895.0,
+      "transcript": "Is it ever right to light a sumon?",
+      "wer": 0.375,
+      "truncated": false,
+      "speculated": false,
+      "stage_ms": {
+        "endpoint_hangover_ms": 368.52,
+        "asr_final_dispatch_ms": 6.03,
+        "asr_final_ms": 252.83,
+        "lm_ttft_ms": 110.7,
+        "lm_sentence_ms": 45.49,
+        "tts_ms": 38.35,
+        "playback_dispatch_ms": 0.33,
+        "asr_partial_first_ms": 614.37
+      },
+      "work_ms": {
+        "asr_final": 252.83,
+        "lm_ttft": 110.7,
+        "lm_sentence": 45.49,
+        "tts": 38.35
+      },
+      "t_wall": "00:08:20",
+      "loadavg": [
+        3.39,
+        4.78,
+        5.74
+      ]
+    },
+    {
+      "system": "cascade-fast",
+      "prompt_id": "t5b",
+      "tier": 5,
+      "tier_name": "open",
+      "prompt": "Is it ever right to lie to someone?",
+      "prompt_words": 8,
+      "prompt_speech_ms": 1475.0,
+      "gap_ms": 641.58,
+      "acoustic_gap_ms": 683.58,
+      "reply": "No, it's never right to light someone.",
+      "reply_tokens": 10,
+      "reply_words": 7,
+      "reply_audio_ms": 2040.0,
+      "transcript": "Is it ever right to light a someone?",
+      "wer": 0.25,
+      "truncated": false,
+      "speculated": true,
+      "stage_ms": {
+        "endpoint_hangover_ms": 374.49,
+        "asr_final_dispatch_ms": 0.0,
+        "asr_final_ms": 5.07,
+        "lm_ttft_ms": 178.75,
+        "lm_sentence_ms": 40.33,
+        "tts_ms": 42.35,
+        "playback_dispatch_ms": 0.6,
+        "asr_partial_first_ms": 623.71
+      },
+      "work_ms": {
+        "asr_final": 265.41,
+        "lm_ttft": 178.75,
+        "lm_sentence": 40.33,
+        "tts": 42.33
+      },
+      "t_wall": "00:08:24",
+      "loadavg": [
+        3.6,
+        4.8,
+        5.74
+      ]
+    },
+    {
+      "system": "cascade-fast-tiny",
+      "prompt_id": "t5b",
+      "tier": 5,
+      "tier_name": "open",
+      "prompt": "Is it ever right to lie to someone?",
+      "prompt_words": 8,
+      "prompt_speech_ms": 1475.0,
+      "gap_ms": 436.69,
+      "acoustic_gap_ms": 478.69,
+      "reply": "No, it's never right to light someone.",
+      "reply_tokens": 10,
+      "reply_words": 7,
+      "reply_audio_ms": 2020.0,
+      "transcript": "Is it ever right to light a someone?",
+      "wer": 0.25,
+      "truncated": false,
+      "speculated": true,
+      "stage_ms": {
+        "endpoint_hangover_ms": 367.42,
+        "asr_final_dispatch_ms": 0.0,
+        "asr_final_ms": 0.0,
+        "lm_ttft_ms": 0.0,
+        "lm_sentence_ms": 21.09,
+        "tts_ms": 44.98,
+        "playback_dispatch_ms": 3.2,
+        "asr_partial_first_ms": 620.06
+      },
+      "work_ms": {
+        "asr_final": 120.24,
+        "lm_ttft": 115.98,
+        "lm_sentence": 38.24,
+        "tts": 44.98
+      },
+      "t_wall": "00:08:28",
+      "loadavg": [
+        3.47,
+        4.75,
+        5.72
+      ]
+    },
+    {
+      "system": "cascade-serial",
+      "prompt_id": "t1c",
+      "tier": 1,
+      "tier_name": "trivial",
+      "prompt": "What colour is fresh snow in winter?",
+      "prompt_words": 7,
+      "prompt_speech_ms": 1755.0,
+      "gap_ms": 754.64,
+      "acoustic_gap_ms": 796.64,
+      "reply": "White.",
+      "reply_tokens": 3,
+      "reply_words": 1,
+      "reply_audio_ms": 345.0,
+      "transcript": "What color is fresh snow in winter?",
+      "wer": 0.1429,
+      "truncated": false,
+      "speculated": false,
+      "stage_ms": {
+        "endpoint_hangover_ms": 365.84,
+        "asr_final_dispatch_ms": 7.53,
+        "asr_final_ms": 238.67,
+        "lm_ttft_ms": 109.44,
+        "lm_sentence_ms": 13.92,
+        "tts_ms": 16.94,
+        "playback_dispatch_ms": 2.29,
+        "asr_partial_first_ms": 620.16
+      },
+      "work_ms": {
+        "asr_final": 238.67,
+        "lm_ttft": 109.44,
+        "lm_sentence": 13.92,
+        "tts": 16.94
+      },
+      "t_wall": "00:08:31",
+      "loadavg": [
+        3.47,
+        4.75,
+        5.72
+      ]
+    },
+    {
+      "system": "cascade-fast",
+      "prompt_id": "t1c",
+      "tier": 1,
+      "tier_name": "trivial",
+      "prompt": "What colour is fresh snow in winter?",
+      "prompt_words": 7,
+      "prompt_speech_ms": 1755.0,
+      "gap_ms": 454.47,
+      "acoustic_gap_ms": 496.47,
+      "reply": "White.",
+      "reply_tokens": 3,
+      "reply_words": 1,
+      "reply_audio_ms": 330.0,
+      "transcript": "What color is fresh snow in winter?",
+      "wer": 0.1429,
+      "truncated": false,
+      "speculated": true,
+      "stage_ms": {
+        "endpoint_hangover_ms": 355.59,
+        "asr_final_dispatch_ms": 0.0,
+        "asr_final_ms": 0.0,
+        "lm_ttft_ms": 69.65,
+        "lm_sentence_ms": 13.07,
+        "tts_ms": 15.5,
+        "playback_dispatch_ms": 0.66,
+        "asr_partial_first_ms": 613.31
+      },
+      "work_ms": {
+        "asr_final": 233.56,
+        "lm_ttft": 106.02,
+        "lm_sentence": 13.07,
+        "tts": 15.49
+      },
+      "t_wall": "00:08:34",
+      "loadavg": [
+        3.43,
+        4.72,
+        5.71
+      ]
+    },
+    {
+      "system": "cascade-fast-tiny",
+      "prompt_id": "t1c",
+      "tier": 1,
+      "tier_name": "trivial",
+      "prompt": "What colour is fresh snow in winter?",
+      "prompt_words": 7,
+      "prompt_speech_ms": 1755.0,
+      "gap_ms": 370.95,
+      "acoustic_gap_ms": 412.95,
+      "reply": "White.",
+      "reply_tokens": 3,
+      "reply_words": 1,
+      "reply_audio_ms": 315.0,
+      "transcript": "What color is fresh snow in winter?",
+      "wer": 0.1429,
+      "truncated": false,
+      "speculated": true,
+      "stage_ms": {
+        "endpoint_hangover_ms": 366.18,
+        "asr_final_dispatch_ms": 0.0,
+        "asr_final_ms": 0.0,
+        "lm_ttft_ms": 0.0,
+        "lm_sentence_ms": 0.0,
+        "tts_ms": 0.0,
+        "playback_dispatch_ms": 4.77,
+        "asr_partial_first_ms": 634.0
+      },
+      "work_ms": {
+        "asr_final": 109.97,
+        "lm_ttft": 106.77,
+        "lm_sentence": 13.01,
+        "tts": 12.26
+      },
+      "t_wall": "00:08:37",
+      "loadavg": [
+        3.4,
+        4.7,
+        5.69
+      ]
+    },
+    {
+      "system": "cascade-serial",
+      "prompt_id": "t2c",
+      "tier": 2,
+      "tier_name": "recall",
+      "prompt": "What is the largest ocean on Earth?",
+      "prompt_words": 7,
+      "prompt_speech_ms": 1615.0,
+      "gap_ms": 810.75,
+      "acoustic_gap_ms": 852.75,
+      "reply": "The Pacific Ocean is the largest ocean on Earth.",
+      "reply_tokens": 10,
+      "reply_words": 9,
+      "reply_audio_ms": 2305.0,
+      "transcript": "What is the largest ocean on Earth?",
+      "wer": 0.0,
+      "truncated": false,
+      "speculated": false,
+      "stage_ms": {
+        "endpoint_hangover_ms": 372.15,
+        "asr_final_dispatch_ms": 6.21,
+        "asr_final_ms": 242.03,
+        "lm_ttft_ms": 103.16,
+        "lm_sentence_ms": 37.91,
+        "tts_ms": 47.87,
+        "playback_dispatch_ms": 1.41,
+        "asr_partial_first_ms": 635.52
+      },
+      "work_ms": {
+        "asr_final": 242.03,
+        "lm_ttft": 103.16,
+        "lm_sentence": 37.91,
+        "tts": 47.87
+      },
+      "t_wall": "00:08:42",
+      "loadavg": [
+        3.29,
+        4.65,
+        5.67
+      ]
+    },
+    {
+      "system": "cascade-fast",
+      "prompt_id": "t2c",
+      "tier": 2,
+      "tier_name": "recall",
+      "prompt": "What is the largest ocean on Earth?",
+      "prompt_words": 7,
+      "prompt_speech_ms": 1615.0,
+      "gap_ms": 572.95,
+      "acoustic_gap_ms": 614.95,
+      "reply": "The Pacific Ocean is the largest ocean on Earth.",
+      "reply_tokens": 10,
+      "reply_words": 9,
+      "reply_audio_ms": 2350.0,
+      "transcript": "What is the largest ocean on Earth?",
+      "wer": 0.0,
+      "truncated": false,
+      "speculated": true,
+      "stage_ms": {
+        "endpoint_hangover_ms": 365.17,
+        "asr_final_dispatch_ms": 0.0,
+        "asr_final_ms": 3.22,
+        "lm_ttft_ms": 116.4,
+        "lm_sentence_ms": 37.3,
+        "tts_ms": 50.45,
+        "playback_dispatch_ms": 0.42,
+        "asr_partial_first_ms": 621.79
+      },
+      "work_ms": {
+        "asr_final": 260.48,
+        "lm_ttft": 116.4,
+        "lm_sentence": 37.3,
+        "tts": 50.44
+      },
+      "t_wall": "00:08:47",
+      "loadavg": [
+        3.29,
+        4.65,
+        5.67
+      ]
+    },
+    {
+      "system": "cascade-fast-tiny",
+      "prompt_id": "t2c",
+      "tier": 2,
+      "tier_name": "recall",
+      "prompt": "What is the largest ocean on Earth?",
+      "prompt_words": 7,
+      "prompt_speech_ms": 1615.0,
+      "gap_ms": 411.63,
+      "acoustic_gap_ms": 453.63,
+      "reply": "The Pacific Ocean is the largest ocean on Earth.",
+      "reply_tokens": 10,
+      "reply_words": 9,
+      "reply_audio_ms": 2465.0,
+      "transcript": "What is the largest ocean on earth?",
+      "wer": 0.0,
+      "truncated": false,
+      "speculated": true,
+      "stage_ms": {
+        "endpoint_hangover_ms": 373.05,
+        "asr_final_dispatch_ms": 0.0,
+        "asr_final_ms": 0.0,
+        "lm_ttft_ms": 0.0,
+        "lm_sentence_ms": 0.0,
+        "tts_ms": 34.8,
+        "playback_dispatch_ms": 3.78,
+        "asr_partial_first_ms": 619.17
+      },
+      "work_ms": {
+        "asr_final": 117.79,
+        "lm_ttft": 109.56,
+        "lm_sentence": 39.52,
+        "tts": 50.28
+      },
+      "t_wall": "00:08:52",
+      "loadavg": [
+        3.18,
+        4.61,
+        5.65
+      ]
+    },
+    {
+      "system": "cascade-serial",
+      "prompt_id": "t3c",
+      "tier": 3,
+      "tier_name": "explain",
+      "prompt": "How does a refrigerator keep the food cold?",
+      "prompt_words": 8,
+      "prompt_speech_ms": 2215.0,
+      "gap_ms": 1240.09,
+      "acoustic_gap_ms": 1282.09,
+      "reply": "It uses a combination of insulation, refrigerant, and temperature control.",
+      "reply_tokens": 14,
+      "reply_words": 10,
+      "reply_audio_ms": 4055.0,
+      "transcript": "How does a refrigerator keep the food cold?",
+      "wer": 0.0,
+      "truncated": false,
+      "speculated": false,
+      "stage_ms": {
+        "endpoint_hangover_ms": 365.12,
+        "asr_final_dispatch_ms": 4.42,
+        "asr_final_ms": 267.57,
+        "lm_ttft_ms": 461.57,
+        "lm_sentence_ms": 54.63,
+        "tts_ms": 82.02,
+        "playback_dispatch_ms": 4.75,
+        "asr_partial_first_ms": 613.1
+      },
+      "work_ms": {
+        "asr_final": 267.57,
+        "lm_ttft": 461.57,
+        "lm_sentence": 54.63,
+        "tts": 82.02
+      },
+      "t_wall": "00:09:00",
+      "loadavg": [
+        3.22,
+        4.57,
+        5.62
+      ]
+    },
+    {
+      "system": "cascade-fast",
+      "prompt_id": "t3c",
+      "tier": 3,
+      "tier_name": "explain",
+      "prompt": "How does a refrigerator keep the food cold?",
+      "prompt_words": 8,
+      "prompt_speech_ms": 2215.0,
+      "gap_ms": 604.9,
+      "acoustic_gap_ms": 646.9,
+      "reply": "It uses a combination of insulation, refrigerant, and temperature control.",
+      "reply_tokens": 14,
+      "reply_words": 10,
+      "reply_audio_ms": 4365.0,
+      "transcript": "How does a refrigerator keep the food cold?",
+      "wer": 0.0,
+      "truncated": false,
+      "speculated": true,
+      "stage_ms": {
+        "endpoint_hangover_ms": 391.43,
+        "asr_final_dispatch_ms": 0.0,
+        "asr_final_ms": 0.0,
+        "lm_ttft_ms": 73.44,
+        "lm_sentence_ms": 51.85,
+        "tts_ms": 85.89,
+        "playback_dispatch_ms": 2.27,
+        "asr_partial_first_ms": 630.64
+      },
+      "work_ms": {
+        "asr_final": 252.11,
+        "lm_ttft": 118.58,
+        "lm_sentence": 51.85,
+        "tts": 85.89
+      },
+      "t_wall": "00:09:07",
+      "loadavg": [
+        3.19,
+        4.52,
+        5.59
+      ]
+    },
+    {
+      "system": "cascade-fast-tiny",
+      "prompt_id": "t3c",
+      "tier": 3,
+      "tier_name": "explain",
+      "prompt": "How does a refrigerator keep the food cold?",
+      "prompt_words": 8,
+      "prompt_speech_ms": 2215.0,
+      "gap_ms": 494.58,
+      "acoustic_gap_ms": 536.58,
+      "reply": "It uses a combination of insulation, refrigerant, and temperature control.",
+      "reply_tokens": 14,
+      "reply_words": 10,
+      "reply_audio_ms": 4400.0,
+      "transcript": "How does a refrigerator keep the food cold?",
+      "wer": 0.0,
+      "truncated": false,
+      "speculated": true,
+      "stage_ms": {
+        "endpoint_hangover_ms": 373.56,
+        "asr_final_dispatch_ms": 0.0,
+        "asr_final_ms": 0.0,
+        "lm_ttft_ms": 0.0,
+        "lm_sentence_ms": 29.84,
+        "tts_ms": 86.27,
+        "playback_dispatch_ms": 4.91,
+        "asr_partial_first_ms": 619.63
+      },
+      "work_ms": {
+        "asr_final": 121.18,
+        "lm_ttft": 116.13,
+        "lm_sentence": 51.97,
+        "tts": 86.26
+      },
+      "t_wall": "00:09:14",
+      "loadavg": [
+        3.09,
+        4.47,
+        5.57
+      ]
+    },
+    {
+      "system": "cascade-serial",
+      "prompt_id": "t4c",
+      "tier": 4,
+      "tier_name": "reason",
+      "prompt": "What is forty dollars with half taken off?",
+      "prompt_words": 8,
+      "prompt_speech_ms": 1895.0,
+      "gap_ms": 891.72,
+      "acoustic_gap_ms": 933.72,
+      "reply": "$40 - $20 = $20",
+      "reply_tokens": 9,
+      "reply_words": 5,
+      "reply_audio_ms": 2315.0,
+      "transcript": "What is $40 with half taken off?",
+      "wer": 0.25,
+      "truncated": false,
+      "speculated": false,
+      "stage_ms": {
+        "endpoint_hangover_ms": 345.98,
+        "asr_final_dispatch_ms": 92.51,
+        "asr_final_ms": 249.6,
+        "lm_ttft_ms": 120.57,
+        "lm_sentence_ms": 34.76,
+        "tts_ms": 46.92,
+        "playback_dispatch_ms": 1.38,
+        "asr_partial_first_ms": 615.81
+      },
+      "work_ms": {
+        "asr_final": 249.6,
+        "lm_ttft": 120.57,
+        "lm_sentence": 34.76,
+        "tts": 46.91
+      },
+      "t_wall": "00:09:20",
+      "loadavg": [
+        3.48,
+        4.53,
+        5.58
+      ]
+    },
+    {
+      "system": "cascade-fast",
+      "prompt_id": "t4c",
+      "tier": 4,
+      "tier_name": "reason",
+      "prompt": "What is forty dollars with half taken off?",
+      "prompt_words": 8,
+      "prompt_speech_ms": 1895.0,
+      "gap_ms": 549.62,
+      "acoustic_gap_ms": 591.62,
+      "reply": "$40 - $20 = $20",
+      "reply_tokens": 9,
+      "reply_words": 5,
+      "reply_audio_ms": 2475.0,
+      "transcript": "What is $40 with half taken off?",
+      "wer": 0.25,
+      "truncated": false,
+      "speculated": true,
+      "stage_ms": {
+        "endpoint_hangover_ms": 362.35,
+        "asr_final_dispatch_ms": 0.0,
+        "asr_final_ms": 0.0,
+        "lm_ttft_ms": 98.89,
+        "lm_sentence_ms": 34.72,
+        "tts_ms": 48.18,
+        "playback_dispatch_ms": 5.47,
+        "asr_partial_first_ms": 615.4
+      },
+      "work_ms": {
+        "asr_final": 250.47,
+        "lm_ttft": 117.82,
+        "lm_sentence": 34.72,
+        "tts": 48.17
+      },
+      "t_wall": "00:09:25",
+      "loadavg": [
+        3.37,
+        4.49,
+        5.56
+      ]
+    },
+    {
+      "system": "cascade-fast-tiny",
+      "prompt_id": "t4c",
+      "tier": 4,
+      "tier_name": "reason",
+      "prompt": "What is forty dollars with half taken off?",
+      "prompt_words": 8,
+      "prompt_speech_ms": 1895.0,
+      "gap_ms": 732.23,
+      "acoustic_gap_ms": 774.23,
+      "reply": "$40 is worth $20.",
+      "reply_tokens": 7,
+      "reply_words": 4,
+      "reply_audio_ms": 1785.0,
+      "transcript": "What is $40 worth half taken off?",
+      "wer": 0.375,
+      "truncated": false,
+      "speculated": true,
+      "stage_ms": {
+        "endpoint_hangover_ms": 345.17,
+        "asr_final_dispatch_ms": 0.0,
+        "asr_final_ms": 0.0,
+        "lm_ttft_ms": 297.84,
+        "lm_sentence_ms": 30.24,
+        "tts_ms": 56.32,
+        "playback_dispatch_ms": 2.66,
+        "asr_partial_first_ms": 622.06
+      },
+      "work_ms": {
+        "asr_final": 136.02,
+        "lm_ttft": 419.9,
+        "lm_sentence": 30.24,
+        "tts": 56.3
+      },
+      "t_wall": "00:09:30",
+      "loadavg": [
+        3.74,
+        4.55,
+        5.57
+      ]
+    },
+    {
+      "system": "cascade-serial",
+      "prompt_id": "t5c",
+      "tier": 5,
+      "tier_name": "open",
+      "prompt": "What makes a person genuinely happy in life?",
+      "prompt_words": 8,
+      "prompt_speech_ms": 2365.0,
+      "gap_ms": 1029.22,
+      "acoustic_gap_ms": 1071.22,
+      "reply": "Belonging to a good family, having loving relationships, and experiencing personal growth.",
+      "reply_tokens": 17,
+      "reply_words": 12,
+      "reply_audio_ms": 4930.0,
+      "transcript": "What makes a person genuinely happy in life?",
+      "wer": 0.0,
+      "truncated": false,
+      "speculated": false,
+      "stage_ms": {
+        "endpoint_hangover_ms": 361.62,
+        "asr_final_dispatch_ms": 107.84,
+        "asr_final_ms": 257.78,
+        "lm_ttft_ms": 122.33,
+        "lm_sentence_ms": 64.7,
+        "tts_ms": 113.65,
+        "playback_dispatch_ms": 1.31,
+        "asr_partial_first_ms": 620.38
+      },
+      "work_ms": {
+        "asr_final": 257.78,
+        "lm_ttft": 122.33,
+        "lm_sentence": 64.7,
+        "tts": 113.65
+      },
+      "t_wall": "00:09:38",
+      "loadavg": [
+        3.69,
+        4.51,
+        5.55
+      ]
+    },
+    {
+      "system": "cascade-fast",
+      "prompt_id": "t5c",
+      "tier": 5,
+      "tier_name": "open",
+      "prompt": "What makes a person genuinely happy in life?",
+      "prompt_words": 8,
+      "prompt_speech_ms": 2365.0,
+      "gap_ms": 754.67,
+      "acoustic_gap_ms": 796.67,
+      "reply": "Belonging to a good family, having loving relationships, and experiencing personal growth.",
+      "reply_tokens": 17,
+      "reply_words": 12,
+      "reply_audio_ms": 4960.0,
+      "transcript": "What makes a person genuinely happy in life?",
+      "wer": 0.0,
+      "truncated": false,
+      "speculated": true,
+      "stage_ms": {
+        "endpoint_hangover_ms": 363.02,
+        "asr_final_dispatch_ms": 0.0,
+        "asr_final_ms": 7.42,
+        "lm_ttft_ms": 193.79,
+        "lm_sentence_ms": 69.0,
+        "tts_ms": 116.8,
+        "playback_dispatch_ms": 4.64,
+        "asr_partial_first_ms": 622.28
+      },
+      "work_ms": {
+        "asr_final": 268.11,
+        "lm_ttft": 193.79,
+        "lm_sentence": 69.0,
+        "tts": 116.79
+      },
+      "t_wall": "00:09:47",
+      "loadavg": [
+        3.63,
+        4.49,
+        5.53
+      ]
+    },
+    {
+      "system": "cascade-fast-tiny",
+      "prompt_id": "t5c",
+      "tier": 5,
+      "tier_name": "open",
+      "prompt": "What makes a person genuinely happy in life?",
+      "prompt_words": 8,
+      "prompt_speech_ms": 2365.0,
+      "gap_ms": 597.06,
+      "acoustic_gap_ms": 639.06,
+      "reply": "Belonging to a good family, having loving relationships, and experiencing personal growth.",
+      "reply_tokens": 17,
+      "reply_words": 12,
+      "reply_audio_ms": 4830.0,
+      "transcript": "What makes a person genuinely happy in life?",
+      "wer": 0.0,
+      "truncated": false,
+      "speculated": true,
+      "stage_ms": {
+        "endpoint_hangover_ms": 356.24,
+        "asr_final_dispatch_ms": 0.0,
+        "asr_final_ms": 0.0,
+        "lm_ttft_ms": 0.0,
+        "lm_sentence_ms": 110.79,
+        "tts_ms": 127.71,
+        "playback_dispatch_ms": 2.32,
+        "asr_partial_first_ms": 626.44
+      },
+      "work_ms": {
+        "asr_final": 134.67,
+        "lm_ttft": 130.98,
+        "lm_sentence": 119.46,
+        "tts": 127.7
+      },
+      "t_wall": "00:09:55",
+      "loadavg": [
+        3.86,
+        4.5,
+        5.53
+      ]
+    },
+    {
+      "system": "cascade-serial",
+      "prompt_id": "t1d",
+      "tier": 1,
+      "tier_name": "trivial",
+      "prompt": "How many legs does a normal dog have?",
+      "prompt_words": 8,
+      "prompt_speech_ms": 2175.0,
+      "gap_ms": 741.67,
+      "acoustic_gap_ms": 783.67,
+      "reply": "Four.",
+      "reply_tokens": 3,
+      "reply_words": 1,
+      "reply_audio_ms": 375.0,
+      "transcript": "How many legs does a normal dog have?",
+      "wer": 0.0,
+      "truncated": false,
+      "speculated": false,
+      "stage_ms": {
+        "endpoint_hangover_ms": 351.07,
+        "asr_final_dispatch_ms": 7.53,
+        "asr_final_ms": 236.46,
+        "lm_ttft_ms": 116.53,
+        "lm_sentence_ms": 13.6,
+        "tts_ms": 12.38,
+        "playback_dispatch_ms": 4.09,
+        "asr_partial_first_ms": 608.98
+      },
+      "work_ms": {
+        "asr_final": 236.46,
+        "lm_ttft": 116.53,
+        "lm_sentence": 13.6,
+        "tts": 12.38
+      },
+      "t_wall": "00:09:59",
+      "loadavg": [
+        4.03,
+        4.53,
+        5.53
+      ]
+    },
+    {
+      "system": "cascade-fast",
+      "prompt_id": "t1d",
+      "tier": 1,
+      "tier_name": "trivial",
+      "prompt": "How many legs does a normal dog have?",
+      "prompt_words": 8,
+      "prompt_speech_ms": 2175.0,
+      "gap_ms": 746.99,
+      "acoustic_gap_ms": 788.99,
+      "reply": "Four.",
+      "reply_tokens": 3,
+      "reply_words": 1,
+      "reply_audio_ms": 365.0,
+      "transcript": "How many legs does a normal dog have?",
+      "wer": 0.0,
+      "truncated": false,
+      "speculated": true,
+      "stage_ms": {
+        "endpoint_hangover_ms": 345.83,
+        "asr_final_dispatch_ms": 0.0,
+        "asr_final_ms": 7.85,
+        "lm_ttft_ms": 360.52,
+        "lm_sentence_ms": 12.95,
+        "tts_ms": 12.26,
+        "playback_dispatch_ms": 7.58,
+        "asr_partial_first_ms": 628.69
+      },
+      "work_ms": {
+        "asr_final": 281.01,
+        "lm_ttft": 360.52,
+        "lm_sentence": 12.95,
+        "tts": 12.26
+      },
+      "t_wall": "00:10:02",
+      "loadavg": [
+        3.87,
+        4.49,
+        5.51
+      ]
+    },
+    {
+      "system": "cascade-fast-tiny",
+      "prompt_id": "t1d",
+      "tier": 1,
+      "tier_name": "trivial",
+      "prompt": "How many legs does a normal dog have?",
+      "prompt_words": 8,
+      "prompt_speech_ms": 2175.0,
+      "gap_ms": 367.22,
+      "acoustic_gap_ms": 409.22,
+      "reply": "Four.",
+      "reply_tokens": 3,
+      "reply_words": 1,
+      "reply_audio_ms": 385.0,
+      "transcript": "How many legs does a normal dog have?",
+      "wer": 0.0,
+      "truncated": false,
+      "speculated": true,
+      "stage_ms": {
+        "endpoint_hangover_ms": 348.72,
+        "asr_final_dispatch_ms": 0.0,
+        "asr_final_ms": 0.0,
+        "lm_ttft_ms": 0.0,
+        "lm_sentence_ms": 0.0,
+        "tts_ms": 14.46,
+        "playback_dispatch_ms": 4.04,
+        "asr_partial_first_ms": 624.94
+      },
+      "work_ms": {
+        "asr_final": 127.05,
+        "lm_ttft": 102.22,
+        "lm_sentence": 13.42,
+        "tts": 25.44
+      },
+      "t_wall": "00:10:05",
+      "loadavg": [
+        3.87,
+        4.49,
+        5.51
+      ]
+    },
+    {
+      "system": "cascade-serial",
+      "prompt_id": "t2d",
+      "tier": 2,
+      "tier_name": "recall",
+      "prompt": "In what year did the Titanic finally sink?",
+      "prompt_words": 8,
+      "prompt_speech_ms": 2335.0,
+      "gap_ms": 788.88,
+      "acoustic_gap_ms": 830.88,
+      "reply": "April 15, 1912.",
+      "reply_tokens": 8,
+      "reply_words": 3,
+      "reply_audio_ms": 2325.0,
+      "transcript": "And what year did the Titanic finally sink?",
+      "wer": 0.125,
+      "truncated": false,
+      "speculated": false,
+      "stage_ms": {
+        "endpoint_hangover_ms": 352.89,
+        "asr_final_dispatch_ms": 1.68,
+        "asr_final_ms": 249.49,
+        "lm_ttft_ms": 105.57,
+        "lm_sentence_ms": 31.09,
+        "tts_ms": 47.43,
+        "playback_dispatch_ms": 0.72,
+        "asr_partial_first_ms": 629.46
+      },
+      "work_ms": {
+        "asr_final": 249.49,
+        "lm_ttft": 105.57,
+        "lm_sentence": 31.09,
+        "tts": 47.42
+      },
+      "t_wall": "00:10:11",
+      "loadavg": [
+        3.72,
+        4.45,
+        5.49
+      ]
+    },
+    {
+      "system": "cascade-fast",
+      "prompt_id": "t2d",
+      "tier": 2,
+      "tier_name": "recall",
+      "prompt": "In what year did the Titanic finally sink?",
+      "prompt_words": 8,
+      "prompt_speech_ms": 2335.0,
+      "gap_ms": 618.5,
+      "acoustic_gap_ms": 660.5,
+      "reply": "April 15, 1912.",
+      "reply_tokens": 8,
+      "reply_words": 3,
+      "reply_audio_ms": 2410.0,
+      "transcript": "In what year did the Titanic finally sink?",
+      "wer": 0.0,
+      "truncated": false,
+      "speculated": true,
+      "stage_ms": {
+        "endpoint_hangover_ms": 366.15,
+        "asr_final_dispatch_ms": 0.0,
+        "asr_final_ms": 0.0,
+        "lm_ttft_ms": 139.43,
+        "lm_sentence_ms": 31.67,
+        "tts_ms": 75.14,
+        "playback_dispatch_ms": 6.11,
+        "asr_partial_first_ms": 607.46
+      },
+      "work_ms": {
+        "asr_final": 247.8,
+        "lm_ttft": 186.3,
+        "lm_sentence": 31.67,
+        "tts": 75.14
+      },
+      "t_wall": "00:10:17",
+      "loadavg": [
+        3.9,
+        4.47,
+        5.49
+      ]
+    },
+    {
+      "system": "cascade-fast-tiny",
+      "prompt_id": "t2d",
+      "tier": 2,
+      "tier_name": "recall",
+      "prompt": "In what year did the Titanic finally sink?",
+      "prompt_words": 8,
+      "prompt_speech_ms": 2335.0,
+      "gap_ms": 383.74,
+      "acoustic_gap_ms": 425.74,
+      "reply": "April 15, 1912.",
+      "reply_tokens": 8,
+      "reply_words": 3,
+      "reply_audio_ms": 2375.0,
+      "transcript": "And what year did the Titanic finally sink?",
+      "wer": 0.125,
+      "truncated": false,
+      "speculated": true,
+      "stage_ms": {
+        "endpoint_hangover_ms": 349.15,
+        "asr_final_dispatch_ms": 0.0,
+        "asr_final_ms": 0.0,
+        "lm_ttft_ms": 0.0,
+        "lm_sentence_ms": 0.0,
+        "tts_ms": 34.27,
+        "playback_dispatch_ms": 0.32,
+        "asr_partial_first_ms": 609.07
+      },
+      "work_ms": {
+        "asr_final": 114.65,
+        "lm_ttft": 117.06,
+        "lm_sentence": 30.95,
+        "tts": 50.43
+      },
+      "t_wall": "00:10:22",
+      "loadavg": [
+        4.12,
+        4.5,
+        5.49
+      ]
+    },
+    {
+      "system": "cascade-serial",
+      "prompt_id": "t3d",
+      "tier": 3,
+      "tier_name": "explain",
+      "prompt": "Why does salt melt the ice on roads?",
+      "prompt_words": 8,
+      "prompt_speech_ms": 1945.0,
+      "gap_ms": 917.35,
+      "acoustic_gap_ms": 959.35,
+      "reply": "The salt is used to melt ice and snow on roads, helping to prevent accidents.",
+      "reply_tokens": 17,
+      "reply_words": 15,
+      "reply_audio_ms": 4285.0,
+      "transcript": "Quite a salt melt the ice on roads.",
+      "wer": 0.25,
+      "truncated": false,
+      "speculated": false,
+      "stage_ms": {
+        "endpoint_hangover_ms": 358.44,
+        "asr_final_dispatch_ms": 30.21,
+        "asr_final_ms": 247.66,
+        "lm_ttft_ms": 124.12,
+        "lm_sentence_ms": 62.6,
+        "tts_ms": 93.9,
+        "playback_dispatch_ms": 0.42,
+        "asr_partial_first_ms": 619.29
+      },
+      "work_ms": {
+        "asr_final": 247.66,
+        "lm_ttft": 124.12,
+        "lm_sentence": 62.6,
+        "tts": 93.9
+      },
+      "t_wall": "00:10:30",
+      "loadavg": [
+        4.27,
+        4.53,
+        5.49
+      ]
+    },
+    {
+      "system": "cascade-fast",
+      "prompt_id": "t3d",
+      "tier": 3,
+      "tier_name": "explain",
+      "prompt": "Why does salt melt the ice on roads?",
+      "prompt_words": 8,
+      "prompt_speech_ms": 1945.0,
+      "gap_ms": 971.2,
+      "acoustic_gap_ms": 1013.2,
+      "reply": "Ice melts the ice on roads.",
+      "reply_tokens": 7,
+      "reply_words": 6,
+      "reply_audio_ms": 1710.0,
+      "transcript": "White as salt melt the ice on roads.",
+      "wer": 0.25,
+      "truncated": false,
+      "speculated": true,
+      "stage_ms": {
+        "endpoint_hangover_ms": 356.37,
+        "asr_final_dispatch_ms": 0.0,
+        "asr_final_ms": 5.25,
+        "lm_ttft_ms": 524.58,
+        "lm_sentence_ms": 31.32,
+        "tts_ms": 49.22,
+        "playback_dispatch_ms": 4.45,
+        "asr_partial_first_ms": 617.25
+      },
+      "work_ms": {
+        "asr_final": 280.01,
+        "lm_ttft": 524.58,
+        "lm_sentence": 31.32,
+        "tts": 49.21
+      },
+      "t_wall": "00:10:35",
+      "loadavg": [
+        4.73,
+        4.62,
+        5.52
+      ]
+    },
+    {
+      "system": "cascade-fast-tiny",
+      "prompt_id": "t3d",
+      "tier": 3,
+      "tier_name": "explain",
+      "prompt": "Why does salt melt the ice on roads?",
+      "prompt_words": 8,
+      "prompt_speech_ms": 1945.0,
+      "gap_ms": 743.64,
+      "acoustic_gap_ms": 785.64,
+      "reply": "Salt lowers the freezing point of water, causing ice to melt.",
+      "reply_tokens": 13,
+      "reply_words": 11,
+      "reply_audio_ms": 3290.0,
+      "transcript": "Why does salt melt the ice on roads?",
+      "wer": 0.0,
+      "truncated": false,
+      "speculated": true,
+      "stage_ms": {
+        "endpoint_hangover_ms": 360.6,
+        "asr_final_dispatch_ms": 0.0,
+        "asr_final_ms": 0.0,
+        "lm_ttft_ms": 248.79,
+        "lm_sentence_ms": 50.36,
+        "tts_ms": 79.87,
+        "playback_dispatch_ms": 4.01,
+        "asr_partial_first_ms": 638.07
+      },
+      "work_ms": {
+        "asr_final": 132.35,
+        "lm_ttft": 381.61,
+        "lm_sentence": 50.36,
+        "tts": 79.87
+      },
+      "t_wall": "00:10:41",
+      "loadavg": [
+        4.83,
+        4.64,
+        5.52
+      ]
+    },
+    {
+      "system": "cascade-serial",
+      "prompt_id": "t4d",
+      "tier": 4,
+      "tier_name": "reason",
+      "prompt": "I bought six eggs and broke two, how many?",
+      "prompt_words": 9,
+      "prompt_speech_ms": 2310.0,
+      "gap_ms": 942.3,
+      "acoustic_gap_ms": 984.3,
+      "reply": "4.",
+      "reply_tokens": 3,
+      "reply_words": 1,
+      "reply_audio_ms": 365.0,
+      "transcript": "I bought 6 eggs and broke 2, how many?",
+      "wer": 0.2222,
+      "truncated": false,
+      "speculated": false,
+      "stage_ms": {
+        "endpoint_hangover_ms": 372.47,
+        "asr_final_dispatch_ms": 2.04,
+        "asr_final_ms": 360.11,
+        "lm_ttft_ms": 158.79,
+        "lm_sentence_ms": 14.0,
+        "tts_ms": 33.74,
+        "playback_dispatch_ms": 1.15,
+        "asr_partial_first_ms": 632.28
+      },
+      "work_ms": {
+        "asr_final": 360.11,
+        "lm_ttft": 158.79,
+        "lm_sentence": 14.0,
+        "tts": 33.73
+      },
+      "t_wall": "00:10:45",
+      "loadavg": [
+        4.77,
+        4.63,
+        5.51
+      ]
+    },
+    {
+      "system": "cascade-fast",
+      "prompt_id": "t4d",
+      "tier": 4,
+      "tier_name": "reason",
+      "prompt": "I bought six eggs and broke two, how many?",
+      "prompt_words": 9,
+      "prompt_speech_ms": 2310.0,
+      "gap_ms": 566.99,
+      "acoustic_gap_ms": 608.99,
+      "reply": "4.",
+      "reply_tokens": 3,
+      "reply_words": 1,
+      "reply_audio_ms": 335.0,
+      "transcript": "I bought 6 eggs and broke 2, how many?",
+      "wer": 0.2222,
+      "truncated": false,
+      "speculated": true,
+      "stage_ms": {
+        "endpoint_hangover_ms": 376.72,
+        "asr_final_dispatch_ms": 0.0,
+        "asr_final_ms": 8.59,
+        "lm_ttft_ms": 134.56,
+        "lm_sentence_ms": 14.77,
+        "tts_ms": 31.28,
+        "playback_dispatch_ms": 1.08,
+        "asr_partial_first_ms": 638.43
+      },
+      "work_ms": {
+        "asr_final": 286.09,
+        "lm_ttft": 134.56,
+        "lm_sentence": 14.77,
+        "tts": 31.28
+      },
+      "t_wall": "00:10:48",
+      "loadavg": [
+        4.78,
+        4.64,
+        5.51
+      ]
+    },
+    {
+      "system": "cascade-fast-tiny",
+      "prompt_id": "t4d",
+      "tier": 4,
+      "tier_name": "reason",
+      "prompt": "I bought six eggs and broke two, how many?",
+      "prompt_words": 9,
+      "prompt_speech_ms": 2310.0,
+      "gap_ms": 380.99,
+      "acoustic_gap_ms": 422.99,
+      "reply": "4.",
+      "reply_tokens": 3,
+      "reply_words": 1,
+      "reply_audio_ms": 335.0,
+      "transcript": "I bought 6 eggs and broke 2, how many?",
+      "wer": 0.2222,
+      "truncated": false,
+      "speculated": true,
+      "stage_ms": {
+        "endpoint_hangover_ms": 376.26,
+        "asr_final_dispatch_ms": 0.0,
+        "asr_final_ms": 0.0,
+        "lm_ttft_ms": 0.0,
+        "lm_sentence_ms": 0.0,
+        "tts_ms": 0.0,
+        "playback_dispatch_ms": 4.72,
+        "asr_partial_first_ms": 616.96
+      },
+      "work_ms": {
+        "asr_final": 125.07,
+        "lm_ttft": 119.79,
+        "lm_sentence": 13.68,
+        "tts": 13.39
+      },
+      "t_wall": "00:10:52",
+      "loadavg": [
+        4.78,
+        4.64,
+        5.51
+      ]
+    },
+    {
+      "system": "cascade-serial",
+      "prompt_id": "t5d",
+      "tier": 5,
+      "tier_name": "open",
+      "prompt": "Should machines ever be allowed to make laws?",
+      "prompt_words": 8,
+      "prompt_speech_ms": 2140.0,
+      "gap_ms": 867.3,
+      "acoustic_gap_ms": 909.3,
+      "reply": "No, machines should not be allowed to make laws.",
+      "reply_tokens": 11,
+      "reply_words": 9,
+      "reply_audio_ms": 2820.0,
+      "transcript": "Should machines ever be allowed to make laws?",
+      "wer": 0.0,
+      "truncated": false,
+      "speculated": false,
+      "stage_ms": {
+        "endpoint_hangover_ms": 369.89,
+        "asr_final_dispatch_ms": 5.36,
+        "asr_final_ms": 251.36,
+        "lm_ttft_ms": 119.25,
+        "lm_sentence_ms": 46.04,
+        "tts_ms": 73.29,
+        "playback_dispatch_ms": 2.11,
+        "asr_partial_first_ms": 614.92
+      },
+      "work_ms": {
+        "asr_final": 251.36,
+        "lm_ttft": 119.25,
+        "lm_sentence": 46.04,
+        "tts": 73.28
+      },
+      "t_wall": "00:10:58",
+      "loadavg": [
+        5.35,
+        4.76,
+        5.54
+      ]
+    },
+    {
+      "system": "cascade-fast",
+      "prompt_id": "t5d",
+      "tier": 5,
+      "tier_name": "open",
+      "prompt": "Should machines ever be allowed to make laws?",
+      "prompt_words": 8,
+      "prompt_speech_ms": 2140.0,
+      "gap_ms": 601.65,
+      "acoustic_gap_ms": 643.65,
+      "reply": "No, machines should not be allowed to make laws.",
+      "reply_tokens": 11,
+      "reply_words": 9,
+      "reply_audio_ms": 2670.0,
+      "transcript": "Should machines ever be allowed to make laws?",
+      "wer": 0.0,
+      "truncated": false,
+      "speculated": true,
+      "stage_ms": {
+        "endpoint_hangover_ms": 360.66,
+        "asr_final_dispatch_ms": 0.0,
+        "asr_final_ms": 13.33,
+        "lm_ttft_ms": 120.89,
+        "lm_sentence_ms": 41.22,
+        "tts_ms": 62.05,
+        "playback_dispatch_ms": 3.5,
+        "asr_partial_first_ms": 616.5
+      },
+      "work_ms": {
+        "asr_final": 286.38,
+        "lm_ttft": 120.89,
+        "lm_sentence": 41.22,
+        "tts": 62.05
+      },
+      "t_wall": "00:11:03",
+      "loadavg": [
+        5.4,
+        4.78,
+        5.55
+      ]
+    },
+    {
+      "system": "cascade-fast-tiny",
+      "prompt_id": "t5d",
+      "tier": 5,
+      "tier_name": "open",
+      "prompt": "Should machines ever be allowed to make laws?",
+      "prompt_words": 8,
+      "prompt_speech_ms": 2140.0,
+      "gap_ms": 1115.37,
+      "acoustic_gap_ms": 1157.37,
+      "reply": "No, machines should not be allowed to make laws.",
+      "reply_tokens": 11,
+      "reply_words": 9,
+      "reply_audio_ms": 2930.0,
+      "transcript": "Should machines ever be allowed to make laws?",
+      "wer": 0.0,
+      "truncated": false,
+      "speculated": true,
+      "stage_ms": {
+        "endpoint_hangover_ms": 363.93,
+        "asr_final_dispatch_ms": 0.0,
+        "asr_final_ms": 0.0,
+        "lm_ttft_ms": 460.48,
+        "lm_sentence_ms": 45.56,
+        "tts_ms": 241.04,
+        "playback_dispatch_ms": 4.37,
+        "asr_partial_first_ms": 614.98
+      },
+      "work_ms": {
+        "asr_final": 161.28,
+        "lm_ttft": 556.19,
+        "lm_sentence": 45.56,
+        "tts": 241.03
+      },
+      "t_wall": "00:11:10",
+      "loadavg": [
+        5.29,
+        4.77,
+        5.54
+      ]
+    },
+    {
+      "system": "cascade-serial",
+      "prompt_id": "t1e",
+      "tier": 1,
+      "tier_name": "trivial",
+      "prompt": "What day comes right after Monday each week?",
+      "prompt_words": 8,
+      "prompt_speech_ms": 1900.0,
+      "gap_ms": 1135.91,
+      "acoustic_gap_ms": 1177.91,
+      "reply": "Tuesday.",
+      "reply_tokens": 3,
+      "reply_words": 1,
+      "reply_audio_ms": 565.0,
+      "transcript": "What day comes right after Monday each week?",
+      "wer": 0.0,
+      "truncated": false,
+      "speculated": false,
+      "stage_ms": {
+        "endpoint_hangover_ms": 361.49,
+        "asr_final_dispatch_ms": 63.62,
+        "asr_final_ms": 266.35,
+        "lm_ttft_ms": 387.8,
+        "lm_sentence_ms": 15.75,
+        "tts_ms": 35.93,
+        "playback_dispatch_ms": 4.97,
+        "asr_partial_first_ms": 650.16
+      },
+      "work_ms": {
+        "asr_final": 266.35,
+        "lm_ttft": 387.8,
+        "lm_sentence": 15.75,
+        "tts": 35.93
+      },
+      "t_wall": "00:11:14",
+      "loadavg": [
+        5.11,
+        4.74,
+        5.52
+      ]
+    },
+    {
+      "system": "cascade-fast",
+      "prompt_id": "t1e",
+      "tier": 1,
+      "tier_name": "trivial",
+      "prompt": "What day comes right after Monday each week?",
+      "prompt_words": 8,
+      "prompt_speech_ms": 1900.0,
+      "gap_ms": 511.24,
+      "acoustic_gap_ms": 553.24,
+      "reply": "Tuesday.",
+      "reply_tokens": 3,
+      "reply_words": 1,
+      "reply_audio_ms": 480.0,
+      "transcript": "What day comes right after Monday each week?",
+      "wer": 0.0,
+      "truncated": false,
+      "speculated": true,
+      "stage_ms": {
+        "endpoint_hangover_ms": 365.13,
+        "asr_final_dispatch_ms": 0.0,
+        "asr_final_ms": 0.0,
+        "lm_ttft_ms": 97.65,
+        "lm_sentence_ms": 13.51,
+        "tts_ms": 29.71,
+        "playback_dispatch_ms": 5.23,
+        "asr_partial_first_ms": 643.42
+      },
+      "work_ms": {
+        "asr_final": 265.37,
+        "lm_ttft": 119.28,
+        "lm_sentence": 13.51,
+        "tts": 29.7
+      },
+      "t_wall": "00:11:17",
+      "loadavg": [
+        5.11,
+        4.74,
+        5.52
+      ]
+    },
+    {
+      "system": "cascade-fast-tiny",
+      "prompt_id": "t1e",
+      "tier": 1,
+      "tier_name": "trivial",
+      "prompt": "What day comes right after Monday each week?",
+      "prompt_words": 8,
+      "prompt_speech_ms": 1900.0,
+      "gap_ms": 366.72,
+      "acoustic_gap_ms": 408.72,
+      "reply": "Tuesday.",
+      "reply_tokens": 3,
+      "reply_words": 1,
+      "reply_audio_ms": 515.0,
+      "transcript": "What day comes right after Monday each week?",
+      "wer": 0.0,
+      "truncated": false,
+      "speculated": true,
+      "stage_ms": {
+        "endpoint_hangover_ms": 362.97,
+        "asr_final_dispatch_ms": 0.0,
+        "asr_final_ms": 0.0,
+        "lm_ttft_ms": 0.0,
+        "lm_sentence_ms": 0.0,
+        "tts_ms": 0.0,
+        "playback_dispatch_ms": 3.75,
+        "asr_partial_first_ms": 620.53
+      },
+      "work_ms": {
+        "asr_final": 127.48,
+        "lm_ttft": 113.06,
+        "lm_sentence": 13.82,
+        "tts": 21.99
+      },
+      "t_wall": "00:11:20",
+      "loadavg": [
+        4.94,
+        4.71,
+        5.51
+      ]
+    },
+    {
+      "system": "cascade-serial",
+      "prompt_id": "t2e",
+      "tier": 2,
+      "tier_name": "recall",
+      "prompt": "Which planet in our system is the largest?",
+      "prompt_words": 8,
+      "prompt_speech_ms": 2260.0,
+      "gap_ms": 776.14,
+      "acoustic_gap_ms": 818.14,
+      "reply": "Jupiter.",
+      "reply_tokens": 4,
+      "reply_words": 1,
+      "reply_audio_ms": 435.0,
+      "transcript": "which planet in our system is the largest.",
+      "wer": 0.0,
+      "truncated": false,
+      "speculated": false,
+      "stage_ms": {
+        "endpoint_hangover_ms": 366.86,
+        "asr_final_dispatch_ms": 5.23,
+        "asr_final_ms": 250.06,
+        "lm_ttft_ms": 120.86,
+        "lm_sentence_ms": 16.95,
+        "tts_ms": 15.16,
+        "playback_dispatch_ms": 1.02,
+        "asr_partial_first_ms": 624.62
+      },
+      "work_ms": {
+        "asr_final": 250.06,
+        "lm_ttft": 120.86,
+        "lm_sentence": 16.95,
+        "tts": 15.16
+      },
+      "t_wall": "00:11:24",
+      "loadavg": [
+        4.7,
+        4.67,
+        5.49
+      ]
+    },
+    {
+      "system": "cascade-fast",
+      "prompt_id": "t2e",
+      "tier": 2,
+      "tier_name": "recall",
+      "prompt": "Which planet in our system is the largest?",
+      "prompt_words": 8,
+      "prompt_speech_ms": 2260.0,
+      "gap_ms": 494.48,
+      "acoustic_gap_ms": 536.48,
+      "reply": "Jupiter.",
+      "reply_tokens": 4,
+      "reply_words": 1,
+      "reply_audio_ms": 495.0,
+      "transcript": "which planet in our system is the largest.",
+      "wer": 0.0,
+      "truncated": false,
+      "speculated": true,
+      "stage_ms": {
+        "endpoint_hangover_ms": 359.35,
+        "asr_final_dispatch_ms": 0.0,
+        "asr_final_ms": 0.0,
+        "lm_ttft_ms": 96.7,
+        "lm_sentence_ms": 16.47,
+        "tts_ms": 21.64,
+        "playback_dispatch_ms": 0.32,
+        "asr_partial_first_ms": 615.16
+      },
+      "work_ms": {
+        "asr_final": 250.05,
+        "lm_ttft": 116.67,
+        "lm_sentence": 16.47,
+        "tts": 21.64
+      },
+      "t_wall": "00:11:28",
+      "loadavg": [
+        4.49,
+        4.62,
+        5.47
+      ]
+    },
+    {
+      "system": "cascade-fast-tiny",
+      "prompt_id": "t2e",
+      "tier": 2,
+      "tier_name": "recall",
+      "prompt": "Which planet in our system is the largest?",
+      "prompt_words": 8,
+      "prompt_speech_ms": 2260.0,
+      "gap_ms": 371.4,
+      "acoustic_gap_ms": 413.4,
+      "reply": "Jupiter.",
+      "reply_tokens": 4,
+      "reply_words": 1,
+      "reply_audio_ms": 425.0,
+      "transcript": "Which planet in our system is the largest?",
+      "wer": 0.0,
+      "truncated": false,
+      "speculated": true,
+      "stage_ms": {
+        "endpoint_hangover_ms": 366.07,
+        "asr_final_dispatch_ms": 0.0,
+        "asr_final_ms": 0.0,
+        "lm_ttft_ms": 0.0,
+        "lm_sentence_ms": 0.0,
+        "tts_ms": 0.0,
+        "playback_dispatch_ms": 5.33,
+        "asr_partial_first_ms": 630.79
+      },
+      "work_ms": {
+        "asr_final": 120.64,
+        "lm_ttft": 119.73,
+        "lm_sentence": 16.7,
+        "tts": 16.54
+      },
+      "t_wall": "00:11:31",
+      "loadavg": [
+        4.49,
+        4.62,
+        5.47
+      ]
+    },
+    {
+      "system": "cascade-serial",
+      "prompt_id": "t3e",
+      "tier": 3,
+      "tier_name": "explain",
+      "prompt": "Why do we feel tired after a meal?",
+      "prompt_words": 8,
+      "prompt_speech_ms": 1905.0,
+      "gap_ms": 1020.67,
+      "acoustic_gap_ms": 1062.67,
+      "reply": "We feel tired after a meal because our body is processing the nutrients from the food, releasing energy.",
+      "reply_tokens": 20,
+      "reply_words": 18,
+      "reply_audio_ms": 5705.0,
+      "transcript": "Why do we feel tired after a meal?",
+      "wer": 0.0,
+      "truncated": false,
+      "speculated": false,
+      "stage_ms": {
+        "endpoint_hangover_ms": 355.88,
+        "asr_final_dispatch_ms": 71.11,
+        "asr_final_ms": 266.72,
+        "lm_ttft_ms": 114.27,
+        "lm_sentence_ms": 75.55,
+        "tts_ms": 135.05,
+        "playback_dispatch_ms": 2.09,
+        "asr_partial_first_ms": 617.02
+      },
+      "work_ms": {
+        "asr_final": 266.72,
+        "lm_ttft": 114.27,
+        "lm_sentence": 75.55,
+        "tts": 135.04
+      },
+      "t_wall": "00:11:40",
+      "loadavg": [
+        6.11,
+        4.96,
+        5.58
+      ]
+    },
+    {
+      "system": "cascade-fast",
+      "prompt_id": "t3e",
+      "tier": 3,
+      "tier_name": "explain",
+      "prompt": "Why do we feel tired after a meal?",
+      "prompt_words": 8,
+      "prompt_speech_ms": 1905.0,
+      "gap_ms": 998.46,
+      "acoustic_gap_ms": 1040.46,
+      "reply": "We feel tired after a meal because our body is processing the nutrients from the food, releasing energy.",
+      "reply_tokens": 20,
+      "reply_words": 18,
+      "reply_audio_ms": 5985.0,
+      "transcript": "Why do we feel tired after a meal?",
+      "wer": 0.0,
+      "truncated": false,
+      "speculated": true,
+      "stage_ms": {
+        "endpoint_hangover_ms": 357.32,
+        "asr_final_dispatch_ms": 0.0,
+        "asr_final_ms": 30.61,
+        "lm_ttft_ms": 379.14,
+        "lm_sentence_ms": 73.95,
+        "tts_ms": 149.32,
+        "playback_dispatch_ms": 8.12,
+        "asr_partial_first_ms": 636.65
+      },
+      "work_ms": {
+        "asr_final": 286.36,
+        "lm_ttft": 379.14,
+        "lm_sentence": 73.95,
+        "tts": 149.31
+      },
+      "t_wall": "00:11:49",
+      "loadavg": [
+        6.22,
+        5.03,
+        5.59
+      ]
+    },
+    {
+      "system": "cascade-fast-tiny",
+      "prompt_id": "t3e",
+      "tier": 3,
+      "tier_name": "explain",
+      "prompt": "Why do we feel tired after a meal?",
+      "prompt_words": 8,
+      "prompt_speech_ms": 1905.0,
+      "gap_ms": 560.69,
+      "acoustic_gap_ms": 602.69,
+      "reply": "We feel tired after a meal because our body is processing the nutrients from the food, releasing energy.",
+      "reply_tokens": 20,
+      "reply_words": 18,
+      "reply_audio_ms": 5650.0,
+      "transcript": "Why do we feel tired after a meal?",
+      "wer": 0.0,
+      "truncated": false,
+      "speculated": true,
+      "stage_ms": {
+        "endpoint_hangover_ms": 362.64,
+        "asr_final_dispatch_ms": 0.0,
+        "asr_final_ms": 0.0,
+        "lm_ttft_ms": 0.0,
+        "lm_sentence_ms": 59.07,
+        "tts_ms": 134.44,
+        "playback_dispatch_ms": 4.55,
+        "asr_partial_first_ms": 640.73
+      },
+      "work_ms": {
+        "asr_final": 128.03,
+        "lm_ttft": 122.07,
+        "lm_sentence": 73.8,
+        "tts": 134.43
+      },
+      "t_wall": "00:11:57",
+      "loadavg": [
+        6.08,
+        5.04,
+        5.59
+      ]
+    },
+    {
+      "system": "cascade-serial",
+      "prompt_id": "t4e",
+      "tier": 4,
+      "tier_name": "reason",
+      "prompt": "If March has thirty one days, when is Easter?",
+      "prompt_words": 9,
+      "prompt_speech_ms": 2450.0,
+      "gap_ms": 863.17,
+      "acoustic_gap_ms": 905.17,
+      "reply": "Easter Sunday is always in the third week of March.",
+      "reply_tokens": 12,
+      "reply_words": 10,
+      "reply_audio_ms": 2545.0,
+      "transcript": "If March has 31 days, when is Easter?",
+      "wer": 0.2222,
+      "truncated": false,
+      "speculated": false,
+      "stage_ms": {
+        "endpoint_hangover_ms": 359.44,
+        "asr_final_dispatch_ms": 30.91,
+        "asr_final_ms": 249.84,
+        "lm_ttft_ms": 106.96,
+        "lm_sentence_ms": 45.94,
+        "tts_ms": 68.48,
+        "playback_dispatch_ms": 1.59,
+        "asr_partial_first_ms": 641.5
+      },
+      "work_ms": {
+        "asr_final": 249.84,
+        "lm_ttft": 106.96,
+        "lm_sentence": 45.94,
+        "tts": 68.48
+      },
+      "t_wall": "00:12:04",
+      "loadavg": [
+        5.76,
+        4.99,
+        5.57
+      ]
+    },
+    {
+      "system": "cascade-fast",
+      "prompt_id": "t4e",
+      "tier": 4,
+      "tier_name": "reason",
+      "prompt": "If March has thirty one days, when is Easter?",
+      "prompt_words": 9,
+      "prompt_speech_ms": 2450.0,
+      "gap_ms": 516.44,
+      "acoustic_gap_ms": 558.44,
+      "reply": "Easter Sunday is always in the third week of March.",
+      "reply_tokens": 12,
+      "reply_words": 10,
+      "reply_audio_ms": 2500.0,
+      "transcript": "If March has 31 days, when is Easter?",
+      "wer": 0.2222,
+      "truncated": false,
+      "speculated": true,
+      "stage_ms": {
+        "endpoint_hangover_ms": 374.69,
+        "asr_final_dispatch_ms": 0.0,
+        "asr_final_ms": 0.0,
+        "lm_ttft_ms": 46.01,
+        "lm_sentence_ms": 44.49,
+        "tts_ms": 50.28,
+        "playback_dispatch_ms": 0.97,
+        "asr_partial_first_ms": 640.99
+      },
+      "work_ms": {
+        "asr_final": 238.74,
+        "lm_ttft": 86.86,
+        "lm_sentence": 44.49,
+        "tts": 50.28
+      },
+      "t_wall": "00:12:09",
+      "loadavg": [
+        5.54,
+        4.96,
+        5.55
+      ]
+    },
+    {
+      "system": "cascade-fast-tiny",
+      "prompt_id": "t4e",
+      "tier": 4,
+      "tier_name": "reason",
+      "prompt": "If March has thirty one days, when is Easter?",
+      "prompt_words": 9,
+      "prompt_speech_ms": 2450.0,
+      "gap_ms": 414.34,
+      "acoustic_gap_ms": 456.34,
+      "reply": "Easter Sunday is always in the third week of March.",
+      "reply_tokens": 12,
+      "reply_words": 10,
+      "reply_audio_ms": 2590.0,
+      "transcript": "If March has 31 days, when is Easter?",
+      "wer": 0.2222,
+      "truncated": false,
+      "speculated": true,
+      "stage_ms": {
+        "endpoint_hangover_ms": 361.29,
+        "asr_final_dispatch_ms": 0.0,
+        "asr_final_ms": 0.0,
+        "lm_ttft_ms": 0.0,
+        "lm_sentence_ms": 0.0,
+        "tts_ms": 47.89,
+        "playback_dispatch_ms": 5.16,
+        "asr_partial_first_ms": 623.62
+      },
+      "work_ms": {
+        "asr_final": 122.89,
+        "lm_ttft": 94.93,
+        "lm_sentence": 47.37,
+        "tts": 48.36
+      },
+      "t_wall": "00:12:15",
+      "loadavg": [
+        5.81,
+        5.03,
+        5.57
+      ]
+    },
+    {
+      "system": "cascade-serial",
+      "prompt_id": "t5e",
+      "tier": 5,
+      "tier_name": "open",
+      "prompt": "What would you change about the world today?",
+      "prompt_words": 8,
+      "prompt_speech_ms": 1810.0,
+      "gap_ms": 816.05,
+      "acoustic_gap_ms": 858.05,
+      "reply": "Climate change and social inequality.",
+      "reply_tokens": 6,
+      "reply_words": 5,
+      "reply_audio_ms": 1990.0,
+      "transcript": "What would you change about the world today?",
+      "wer": 0.0,
+      "truncated": false,
+      "speculated": false,
+      "stage_ms": {
+        "endpoint_hangover_ms": 356.49,
+        "asr_final_dispatch_ms": 0.57,
+        "asr_final_ms": 247.79,
+        "lm_ttft_ms": 142.63,
+        "lm_sentence_ms": 24.62,
+        "tts_ms": 42.56,
+        "playback_dispatch_ms": 1.39,
+        "asr_partial_first_ms": 619.16
+      },
+      "work_ms": {
+        "asr_final": 247.79,
+        "lm_ttft": 142.63,
+        "lm_sentence": 24.62,
+        "tts": 42.55
+      },
+      "t_wall": "00:12:20",
+      "loadavg": [
+        6.15,
+        5.11,
+        5.6
+      ]
+    },
+    {
+      "system": "cascade-fast",
+      "prompt_id": "t5e",
+      "tier": 5,
+      "tier_name": "open",
+      "prompt": "What would you change about the world today?",
+      "prompt_words": 8,
+      "prompt_speech_ms": 1810.0,
+      "gap_ms": 525.98,
+      "acoustic_gap_ms": 567.98,
+      "reply": "Climate change and social inequality.",
+      "reply_tokens": 6,
+      "reply_words": 5,
+      "reply_audio_ms": 2035.0,
+      "transcript": "What would you change about the world today?",
+      "wer": 0.0,
+      "truncated": false,
+      "speculated": true,
+      "stage_ms": {
+        "endpoint_hangover_ms": 385.97,
+        "asr_final_dispatch_ms": 0.0,
+        "asr_final_ms": 0.0,
+        "lm_ttft_ms": 70.66,
+        "lm_sentence_ms": 23.75,
+        "tts_ms": 41.49,
+        "playback_dispatch_ms": 4.11,
+        "asr_partial_first_ms": 620.68
+      },
+      "work_ms": {
+        "asr_final": 250.94,
+        "lm_ttft": 114.05,
+        "lm_sentence": 23.75,
+        "tts": 41.48
+      },
+      "t_wall": "00:12:25",
+      "loadavg": [
+        6.3,
+        5.16,
+        5.61
+      ]
+    },
+    {
+      "system": "cascade-fast-tiny",
+      "prompt_id": "t5e",
+      "tier": 5,
+      "tier_name": "open",
+      "prompt": "What would you change about the world today?",
+      "prompt_words": 8,
+      "prompt_speech_ms": 1810.0,
+      "gap_ms": 402.22,
+      "acoustic_gap_ms": 444.22,
+      "reply": "Climate change and social inequality.",
+      "reply_tokens": 6,
+      "reply_words": 5,
+      "reply_audio_ms": 2055.0,
+      "transcript": "What would you change about the world today?",
+      "wer": 0.0,
+      "truncated": false,
+      "speculated": true,
+      "stage_ms": {
+        "endpoint_hangover_ms": 359.36,
+        "asr_final_dispatch_ms": 0.0,
+        "asr_final_ms": 0.0,
+        "lm_ttft_ms": 0.0,
+        "lm_sentence_ms": 0.0,
+        "tts_ms": 40.87,
+        "playback_dispatch_ms": 2.0,
+        "asr_partial_first_ms": 613.09
+      },
+      "work_ms": {
+        "asr_final": 120.17,
+        "lm_ttft": 115.01,
+        "lm_sentence": 23.71,
+        "tts": 44.11
+      },
+      "t_wall": "00:12:29",
+      "loadavg": [
+        6.67,
+        5.25,
+        5.64
+      ]
+    }
+  ],
+  "loadavg_end": [
+    6.67,
+    5.25,
+    5.64
+  ]
+}

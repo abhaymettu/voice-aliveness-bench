@@ -66,6 +66,38 @@ def speech_bounds_ms(x):
     return float(segs[0][0]), float(segs[-1][1])
 
 
+def reply_bounds_ms(rec, reply_audio_ms=None):
+    """(onset, offset) of the agent's REPLY inside a recorded output timeline.
+
+    Not the same thing as the first sound in the recording, and the difference
+    is the whole of dimension 5. If a system puts a breath or an "uh" in the
+    gap, that cue is speech to the VAD, so ``speech_bounds_ms(rec)[0]`` returns
+    the cue's onset and every gap window computed from it is wrong -- exactly
+    on the systems that would have scored well.
+
+    So the reply is anchored from its END, which no gap cue can precede:
+
+        offset = last speech in the recording  (the reply's last sample)
+        onset  = offset - reply_audio_ms       (the length the agent synthesised)
+
+    Falls back to the first speech segment when the reply length is unknown,
+    and says so, rather than silently using the fragile anchor.
+    """
+    b = speech_bounds_ms(rec)
+    if b is None:
+        return None
+    first_on, offset = b
+    if reply_audio_ms is None:
+        return first_on, offset, "first-segment anchor (reply length unknown)"
+    onset = offset - float(reply_audio_ms)
+    # The reply cannot start before the recording does, and if the anchored
+    # onset lands before the first detected sound the recording simply had
+    # nothing else in it -- use the first segment then.
+    if onset < first_on - 1.0:
+        onset = max(0.0, onset)
+    return onset, offset, "anchored from the reply's end using reply_audio_ms"
+
+
 def git_sha(d: Path) -> str:
     try:
         r = subprocess.run(
