@@ -184,6 +184,28 @@ def render(agg: dict) -> str:
     return "\n".join(L)
 
 
+def markdown(agg: dict) -> str:
+    """The results table as markdown, so the README never carries a hand-typed
+    number that can drift from the results file."""
+    L = ["| system | gap median [IQR] | rho vs difficulty (reply length out) | "
+         "barge-in yields | speaks into silence | prosody vs context | gaps filled |",
+         "|---|---|---|---|---|---|---|"]
+    for r in agg["table"]:
+        g, i, s_, p_, n = (r["gap"], r["interrupt"], r["silence"], r["prosody"],
+                           r["nonverbal"])
+        gc = (f"{g['median_ms']:.0f} ms [{g['iqr_ms'][0]:.0f}–{g['iqr_ms'][1]:.0f}]"
+              if "median_ms" in g else "not measured")
+        ac = f"{g['rho_partialling_reply_length']}" if "median_ms" in g else "not measured"
+        ic = f"{i['n_yielded']}/{i['n']}" if "n" in i else "not measured"
+        sc = ("never" if "n" in s_ and not s_["re_prompts"]
+              else "re-prompts" if "n" in s_ else "not measured")
+        cs = p_.get("context_sensitivity")
+        pc = "none" if cs == 0.0 else "some" if cs else "not measured"
+        nc = (f"{n['n'] - n['n_dead_air']}/{n['n']}" if "n" in n else "not measured")
+        L.append(f"| `{r['system']}` | {gc} | {ac} | {ic} | {sc} | {pc} | {nc} |")
+    return "\n".join(L)
+
+
 def demo():
     """Self-check: a missing dimension must surface as not-measured, never as 0."""
     fake = {
@@ -211,6 +233,8 @@ def demo():
     assert t[0]["nonverbal"]["dead_air_rate"] == 1.0
     txt = render({"table": t, "not_measured": []})
     assert "not-measured" in txt
+    md = markdown({"table": t})
+    assert md.count("|") > 12 and "not measured" in md, md
     print("aggregate self-check OK  (a dimension that did not run reports not-measured, "
           "never zero)")
 
@@ -222,9 +246,13 @@ if __name__ == "__main__":
     ap.add_argument("--results", default="results")
     ap.add_argument("--out", default="results/aggregate.json")
     ap.add_argument("--selfcheck", action="store_true")
+    ap.add_argument("--markdown", action="store_true",
+        help="emit the results table as markdown for the README")
     a = ap.parse_args()
     if a.selfcheck:
         demo()
+    elif a.markdown:
+        print(markdown(build(a.results)))
     else:
         agg = build(a.results)
         Path(a.out).write_text(json.dumps(agg, indent=2, default=str))
