@@ -51,7 +51,7 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from bench import prompts as P  # noqa: E402
-from bench.common import audio_mod, speech_bounds_ms, stats, write_result  # noqa: E402
+from bench.common import audio_mod, reply_bounds_ms, stats, write_result  # noqa: E402
 from bench.runner import (  # noqa: E402
     base_result, close_systems, interleave, open_systems, turn_stamp,
 )
@@ -87,11 +87,14 @@ def reply_wav(t: dict, path: Path) -> float | None:
     rec = t.get("out_rec")
     if rec is None or rec.size == 0:
         return None
-    b = speech_bounds_ms(rec)
+    # anchored from the reply's end, so a gap cue would not be spliced into the
+    # front of the reply and dragged through the feature extractor (see
+    # common.reply_bounds_ms)
+    b = reply_bounds_ms(rec, t.get("reply_audio_ms"))
     if b is None:
         return None
     a = audio_mod()
-    y = rec[a.samples(b[0]) : a.samples(b[1])]
+    y = rec[a.samples(max(0.0, b[0])) : a.samples(b[1])]
     if y.size < a.samples(120.0):
         return None
     path.parent.mkdir(parents=True, exist_ok=True)
