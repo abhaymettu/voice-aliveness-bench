@@ -8,16 +8,25 @@
     "nonverbal": "ok"
   },
   "provenance": {
-    "run_at": "2026-08-27T00:12:32",
+    "run_at": "2026-08-27T01:13:32",
     "host": "Abhays-MacBook-Pro",
     "platform": "Darwin 25.5.0 arm64",
     "python": "3.12.13",
-    "bench_sha": "b72e8bf-dirty",
+    "executable": "/Users/abhay/Desktop/Playground/aliveness-threshold/.venv/bin/python",
+    "sys_path_head": [
+      "/Users/abhay/Desktop/Playground/aliveness-threshold",
+      "/Users/abhay/Desktop/Playground/voice-aliveness-bench",
+      "/Users/abhay/Desktop/Playground/voice-aliveness-bench/bench",
+      "/Users/abhay/Desktop/Playground/voice-aliveness-bench",
+      "/Users/abhay/Desktop/Playground/voice-aliveness-bench/.venv/lib/python3.12/site-packages",
+      "/Users/abhay/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python312.zip"
+    ],
+    "bench_sha": "a155e84",
     "aliveness_sha": "0d202a6",
     "loadavg_start": [
-      6.67,
-      5.25,
-      5.64
+      3.57,
+      3.06,
+      3.38
     ]
   },
   "table": [
@@ -25,25 +34,25 @@
       "system": "cascade-fast",
       "gap": {
         "n": 25,
-        "median_ms": 549.6,
+        "median_ms": 539.6,
         "iqr_ms": [
-          496.3,
-          694.3
+          496.4,
+          562.3
         ],
-        "rho_vs_difficulty": 0.298,
-        "p": 0.1458,
-        "rho_partialling_reply_length": -0.032,
-        "rho_vs_reply_length": 0.612,
-        "tier5_minus_tier1_ms": 105.7,
+        "rho_vs_difficulty": 0.408,
+        "p": 0.0427,
+        "rho_partialling_reply_length": -0.013,
+        "rho_vs_reply_length": 0.832,
+        "tier5_minus_tier1_ms": 69.3,
         "false_endpoints": 0,
-        "wer": 0.0899
+        "wer": 0.0812
       },
       "interrupt": {
         "n": 25,
         "n_yielded": 0,
         "yield_rate": 0.0,
         "n_heard": 0,
-        "talked_over_median_ms": 1992.6,
+        "talked_over_median_ms": 2106.9,
         "verdict": "never yields: output ran to the end of the reply on every landed barge-in, and the barge-in never reached the transcript"
       },
       "silence": {
@@ -89,25 +98,25 @@
       "system": "cascade-fast-tiny",
       "gap": {
         "n": 25,
-        "median_ms": 402.2,
+        "median_ms": 410.9,
         "iqr_ms": [
-          371.2,
-          560.8
+          373.9,
+          472.2
         ],
-        "rho_vs_difficulty": 0.482,
-        "p": 0.017,
-        "rho_partialling_reply_length": 0.195,
-        "rho_vs_reply_length": 0.854,
-        "tier5_minus_tier1_ms": 69.5,
+        "rho_vs_difficulty": 0.329,
+        "p": 0.1083,
+        "rho_partialling_reply_length": -0.277,
+        "rho_vs_reply_length": 0.871,
+        "tier5_minus_tier1_ms": 63.1,
         "false_endpoints": 0,
-        "wer": 0.1006
+        "wer": 0.0856
       },
       "interrupt": {
         "n": 21,
         "n_yielded": 0,
         "yield_rate": 0.0,
         "n_heard": 0,
-        "talked_over_median_ms": 1991.9,
+        "talked_over_median_ms": 2446.7,
         "verdict": "never yields: output ran to the end of the reply on every landed barge-in, and the barge-in never reached the transcript"
       },
       "silence": {
@@ -153,25 +162,25 @@
       "system": "cascade-serial",
       "gap": {
         "n": 25,
-        "median_ms": 822.2,
+        "median_ms": 818.0,
         "iqr_ms": [
-          782.5,
-          929.8
+          771.6,
+          853.2
         ],
-        "rho_vs_difficulty": 0.18,
-        "p": 0.3903,
-        "rho_partialling_reply_length": -0.065,
-        "rho_vs_reply_length": 0.454,
-        "tier5_minus_tier1_ms": 67.6,
+        "rho_vs_difficulty": 0.51,
+        "p": 0.0092,
+        "rho_partialling_reply_length": 0.214,
+        "rho_vs_reply_length": 0.802,
+        "tier5_minus_tier1_ms": 76.6,
         "false_endpoints": 0,
-        "wer": 0.0999
+        "wer": 0.0812
       },
       "interrupt": {
         "n": 27,
         "n_yielded": 0,
         "yield_rate": 0.0,
         "n_heard": 0,
-        "talked_over_median_ms": 1956.8,
+        "talked_over_median_ms": 1755.1,
         "verdict": "never yields: output ran to the end of the reply on every landed barge-in, and the barge-in never reached the transcript"
       },
       "silence": {
@@ -216,12 +225,27 @@
     {
       "system": "cascade-serial-say",
       "gap": {
-        "status": "not-measured",
-        "reason": "this system was not part of that dimension's run"
+        "n": 25,
+        "median_ms": 1758.7,
+        "iqr_ms": [
+          1574.2,
+          1848.8
+        ],
+        "rho_vs_difficulty": 0.404,
+        "p": 0.0459,
+        "rho_partialling_reply_length": -0.106,
+        "rho_vs_reply_length": 0.894,
+        "tier5_minus_tier1_ms": 250.6,
+        "false_endpoints": 0,
+        "wer": 0.0812
       },
       "interrupt": {
-        "status": "not-measured",
-        "reason": "this system was not part of that dimension's run"
+        "n": 21,
+        "n_yielded": 0,
+        "yield_rate": 0.0,
+        "n_heard": 0,
+        "talked_over_median_ms": 1683.5,
+        "verdict": "never yields: output ran to the end of the reply on every landed barge-in, and the barge-in never reached the transcript"
       },
       "silence": {
         "status": "not-measured",
@@ -237,35 +261,17 @@
         "context_deterministic_backend": true
       },
       "nonverbal": {
-        "status": "not-measured",
-        "reason": "this system was not part of that dimension's run"
+        "n": 20,
+        "filled_fraction_median": 0.0,
+        "peak_dbfs_median": -240.0,
+        "dead_air_rate": 1.0,
+        "n_dead_air": 20,
+        "verdict": "dead air on 20/20 turns: nothing above -55.0 dBFS in any measured gap",
+        "demo_wav": "nonverbal/cascade-serial-say-gap-demo.wav"
       }
     }
   ],
-  "not_measured": [
-    {
-      "name": "moshi-mlx-q4",
-      "kind": "local full-duplex speech-to-speech",
-      "status": "not-measured",
-      "reason": "weight download incomplete: 2 file(s) still partial, 3.94 GB fetched of ~5.2 GB",
-      "weights_dir": "/Users/abhay/.cache/huggingface/hub/models--kyutai--moshiko-mlx-q4",
-      "bytes_on_disk": 3941974643,
-      "n_complete_files": 3,
-      "n_incomplete_files": 2,
-      "wrapper_dir": "/Users/abhay/Desktop/Playground/fullduplex-voice",
-      "wrapper_files": [
-        "cascade_bargein.py",
-        "cascade_baseline.py",
-        "compare.py",
-        "demo.py",
-        "floor.py",
-        "gap.py",
-        "moshi_run.py"
-      ],
-      "note": "no second download was started; bandwidth was the binding constraint and the sibling pull was already in flight",
-      "why_it_matters": "the only system in reach that is architecturally able to score above zero on interruption handling and non-verbal presence; every cascade config here cannot, by construction"
-    }
-  ],
+  "not_measured": [],
   "positive_controls": {
     "nonverbal": {
       "note": "sibling repo's harness/cues.py rendered into an 800ms gap and run through this dimension's detector. Not a system under test.",
@@ -281,8 +287,8 @@
           "wav": "nonverbal/control-none.wav"
         },
         "filled_pause": {
-          "filled_fraction": 0.3544,
-          "peak_dbfs": -23.3,
+          "filled_fraction": 0.3671,
+          "peak_dbfs": -25.1,
           "n_events": 1,
           "detected": true,
           "gap_window_ms": 790.0,
@@ -328,8 +334,7 @@
         "verbal_stall"
       ],
       "detector_silent_on_none_cue": true,
-      "valid": true,
-      "recomputed_note": "the control was re-run minutes after the turn data, on the same machine, after a window-location bug was found and fixed; the per-turn measurements above were not affected by that bug and were not re-run"
+      "valid": true
     },
     "prosody_ceiling": {
       "note": "macOS `say` under explicit prosody tags; a reference scale, not a system under test",

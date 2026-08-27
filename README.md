@@ -14,23 +14,29 @@ per-turn JSON that produced it is in `results/`.
 **The gap does not track how hard the question is. It tracks how long the answer is.**
 
 A person takes longer to answer *"what is the meaning of life"* than *"what is two plus two."*
-None of the three agents measured here do. The raw correlation between response gap and
+None of the four agents measured here do. The raw correlation between response gap and
 question difficulty looks positive — and on the fastest configuration it even reaches
 significance — but every prompt was matched to 7–9 words, and once **reply length** is
 partialled out the correlation collapses to nothing on all three:
 
 | system | gap vs difficulty (ρ) | p | gap vs reply length (ρ) | ρ with reply length partialled out |
 |---|---|---|---|---|
-| cascade-serial | 0.180 | 0.390 | 0.454 | **−0.065** |
-| cascade-fast | 0.298 | 0.146 | 0.612 | **−0.032** |
-| cascade-fast-tiny | 0.482 | **0.017** | 0.854 | **0.195** |
+| cascade-serial | 0.510 | **0.009** | 0.802 | **+0.214** |
+| cascade-fast | 0.408 | **0.043** | 0.832 | **−0.013** |
+| cascade-fast-tiny | 0.329 | 0.108 | 0.871 | **−0.277** |
+| cascade-serial-say | 0.404 | **0.046** | 0.894 | **−0.106** |
 
-n = 25 turns per system. Spearman ρ, p from 10,000 permutations (seed 0).
+n = 25 turns per system, four systems, interleaved. Spearman ρ, p from 10,000 permutations
+(seed 0). **Three of the four show a statistically significant raw correlation with
+difficulty. All four lose it when reply length is removed.** The gap correlates with reply
+length at ρ = 0.80–0.89 on every system; with prompt audio duration at ρ = −0.12 to +0.19,
+confirming the length-matched prompt design held.
 
 The apparent adaptation is an artefact of synthesising the whole utterance before speaking:
 harder question → wordier answer → longer TTS → longer gap. Nothing in any of these systems
-models difficulty at all. The difference between tier 5 and tier 1 is 68–106 ms on a
-400–820 ms gap.
+models difficulty at all. The tier-5-minus-tier-1 difference is 63–77 ms on gaps of
+411–818 ms, and 251 ms on the `say` backend — which is not difficulty modelling either, just
+a slower synthesiser paying more for the extra words.
 
 **And four of the five dimensions are floored at zero for every system measured.** Nothing
 yields to an interruption, nothing speaks into silence, no voice carries any conversational
@@ -101,11 +107,12 @@ on the no-cue case. The systems read −240 dBFS, which is literal digital silen
 
 ## Results
 
-| system | gap median [IQR] | ρ (difficulty, reply length out) | barge-in yields | speaks into silence | prosody vs context | gaps filled |
+| system | gap median [IQR] | rho vs difficulty (reply length out) | barge-in yields | speaks into silence | prosody vs context | gaps filled |
 |---|---|---|---|---|---|---|
-| cascade-serial | 822 ms [782–930] | −0.065 | 0/17 | never | none | 0/20 |
-| cascade-fast | 550 ms [496–694] | −0.032 | 0/16 | never | none | 0/20 |
-| cascade-fast-tiny | 402 ms [371–561] | 0.195 | 0/13 | never | none | 0/20 |
+| `cascade-fast` | 540 ms [496–562] | -0.013 | 0/25 | never | none | 0/20 |
+| `cascade-fast-tiny` | 411 ms [374–472] | -0.277 | 0/21 | never | none | 0/20 |
+| `cascade-serial` | 818 ms [772–853] | 0.214 | 0/27 | never | none | 0/20 |
+| `cascade-serial-say` | 1759 ms [1574–1849] | -0.106 | 0/21 | not measured | none | 0/20 |
 
 Full per-turn records in `results/*.json`; the aggregated table in `results/aggregate.json`;
 figures in `figures/` (light and dark); the leaderboard with playable audio in
@@ -117,22 +124,36 @@ and it would let a system buy a better headline by getting faster at the one thi
 easy to get faster at. If you want one number, weight the columns yourself — and say plainly
 that the weights are your choice, not a finding.
 
-### What the three systems are
+### What the four systems are
 
-They are the same cascade agent (`aliveness-threshold/live/loop.py`, imported not vendored)
-under three schedules. They share a voice, a language model, an ASR family and a TTS backend,
-and differ **only in when work happens**:
+Three of them are the same cascade agent (`aliveness-threshold/live/loop.py`, imported not
+vendored) under three schedules. They share a voice, a language model, an ASR family and a
+TTS backend, and differ **only in when work happens**:
 
 - `cascade-serial` — downstream runs after the endpointer fires. The original path.
 - `cascade-fast` — the final decode, LM and TTS run speculatively *inside* the endpointer's
   350 ms hangover, armed after 80 ms of silence.
 - `cascade-fast-tiny` — same, with the final ASR decode on `tiny.en` instead of `base.en`.
 
-That makes them a clean controlled contrast: any difference across the five dimensions is
-attributable to scheduling, not to what the system is. **The result is that scheduling buys
-2.0× on the gap and changes nothing else.** Speed did not cost interruptibility either —
-the fast path commits to a reply after 80 ms of silence, which we expected might make barge-in
-worse, and it did not, because none of the three was ever interruptible to begin with.
+The fourth swaps only the TTS backend:
+
+- `cascade-serial-say` — the serial path speaking through macOS `say` instead of piper.
+
+That gives two clean controlled contrasts, and the comparison between them is the most
+useful thing in this table:
+
+**Scheduling bought 407 ms (818 → 411). Changing the TTS backend cost 941 ms (818 → 1759).**
+The synthesiser choice moves the gap more than twice as much as the entire speculative
+scheduling optimisation recovers — and `say` is the default fallback the loop uses whenever a
+piper voice is missing. A stack can lose all of its latency work to one absent model file.
+
+**And nothing else moved at all.** Across interruption, silence, prosody and non-verbal
+presence, all four systems return the identical floored result. Scheduling changes the
+number; the backend changes the number; neither changes whether the thing feels alive.
+
+Speed did not cost interruptibility either — the fast path commits to a reply after 80 ms of
+silence, which we expected might make barge-in worse, and it did not, because none of the
+four was ever interruptible to begin with.
 
 ---
 
